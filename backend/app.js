@@ -4,6 +4,16 @@ const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
 
+/*
+|--------------------------------------------------------------------------
+| Routes
+|--------------------------------------------------------------------------
+*/
+
+const authRoutes = require(
+  "./src/modules/auth/auth.routes"
+);
+
 const app = express();
 
 /*
@@ -11,6 +21,7 @@ const app = express();
 | Security
 |--------------------------------------------------------------------------
 */
+
 app.use(helmet());
 
 /*
@@ -18,9 +29,12 @@ app.use(helmet());
 | CORS
 |--------------------------------------------------------------------------
 */
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin:
+      process.env.FRONTEND_URL ||
+      "http://localhost:3000",
     credentials: true
   })
 );
@@ -30,13 +44,15 @@ app.use(
 | Performance
 |--------------------------------------------------------------------------
 */
+
 app.use(compression());
 
 /*
 |--------------------------------------------------------------------------
-| Body Parser
+| Body Parsers
 |--------------------------------------------------------------------------
 */
+
 app.use(
   express.json({
     limit: "10mb"
@@ -55,6 +71,7 @@ app.use(
 | Logger
 |--------------------------------------------------------------------------
 */
+
 app.use(morgan("dev"));
 
 /*
@@ -62,6 +79,7 @@ app.use(morgan("dev"));
 | Health Check
 |--------------------------------------------------------------------------
 */
+
 app.get("/", (req, res) => {
   return res.status(200).json({
     success: true,
@@ -72,10 +90,22 @@ app.get("/", (req, res) => {
 
 /*
 |--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/auth",
+  authRoutes
+);
+
+/*
+|--------------------------------------------------------------------------
 | 404 Handler
 |--------------------------------------------------------------------------
 */
-app.use("*", (req, res) => {
+
+app.use((req, res) => {
   return res.status(404).json({
     success: false,
     message: "Route not found"
