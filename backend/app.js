@@ -18,6 +18,10 @@ const storeRoutes = require(
   "./src/modules/stores/store.routes"
 );
 
+const shopifyRoutes = require(
+  "./src/modules/shopify/shopify.routes"
+);
+
 const errorHandler = require(
   "./src/middleware/errorHandler"
 );
@@ -57,7 +61,7 @@ app.use(compression());
 
 /*
 |--------------------------------------------------------------------------
-| Body Parser
+| Body Parsers
 |--------------------------------------------------------------------------
 */
 
@@ -112,9 +116,14 @@ app.use(
   storeRoutes
 );
 
+app.use(
+  "/api/shopify",
+  shopifyRoutes
+);
+
 /*
 |--------------------------------------------------------------------------
-| 404
+| 404 Handler
 |--------------------------------------------------------------------------
 */
 
@@ -127,7 +136,7 @@ app.use((req, res) => {
 
 /*
 |--------------------------------------------------------------------------
-| Error Handler
+| Global Error Handler
 |--------------------------------------------------------------------------
 */
 
