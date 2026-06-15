@@ -26,6 +26,10 @@ const shopifyRoutes = require(
   "./src/modules/shopify/shopify.routes"
 );
 
+const themeRoutes = require(
+  "./src/modules/themes/theme.routes"
+);
+
 const errorHandler = require(
   "./src/middleware/errorHandler"
 );
@@ -136,6 +140,11 @@ app.use(
 app.use(
   "/api/stores",
   storeRoutes
+);
+
+app.use(
+  "/api/themes",
+  themeRoutes
 );
 
 app.use(
