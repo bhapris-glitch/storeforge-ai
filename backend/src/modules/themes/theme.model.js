@@ -213,6 +213,21 @@ const themeSchema = new mongoose.Schema(
       default: ""
     },
 
+    previewToken: {
+  type: String,
+  default: ""
+},
+
+previewEnabled: {
+  type: Boolean,
+  default: false
+},
+
+previewExpiresAt: {
+  type: Date,
+  default: null
+},
+
     previewImage: {
       type: String,
       default: ""
