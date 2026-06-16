@@ -1,5 +1,5 @@
 // ==========================================================
-// Layboka AI 
+// Layboka AI
 // storeforge-ai/backend/src/modules/themes/theme.model.js
 // =========================================================
 const mongoose = require("mongoose");
