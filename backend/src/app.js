@@ -39,6 +39,9 @@ const themeRoutes =
 const brandRoutes =
   require('./modules/branding/brand.routes');
 
+const productRoutes =
+  require('./modules/products/product.routes');
+
 
 // ============================================================================
 // ERROR HANDLER
@@ -210,6 +213,18 @@ app.get(
 app.use(
   '/api/auth',
   authRoutes
+);
+
+// ============================================================================
+// AUTH ROUTES
+// ============================================================================
+//
+// /api/product 
+//
+
+app.use(
+  '/api/products',
+  productRoutes
 );
 
 
