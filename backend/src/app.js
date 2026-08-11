@@ -7,21 +7,6 @@
  * File:
  * backend/src/app.js
  *
- * Purpose:
- * - Configure Express
- * - Configure security middleware
- * - Configure CORS
- * - Configure request parsing
- * - Configure Shopify raw webhook handling
- * - Mount application routes
- * - Handle 404 responses
- * - Handle global errors
- *
- * NOTE:
- * MongoDB connection and app.listen() belong in:
- *
- *   backend/src/server.js
- *
  * ============================================================================
  */
 
@@ -42,7 +27,8 @@ const authRoutes = require('./modules/auth/auth.routes');
 
 const storeRoutes = require('./modules/stores/store.routes');
 
-const shopifyRoutes = require('./modules/shopify/shopify.routes');
+const shopifyRoutes =
+  require('./modules/shopify/shopify.routes');
 
 const shopifyWebhookRoutes =
   require('./modules/shopify/shopify.webhook.routes');
@@ -50,9 +36,12 @@ const shopifyWebhookRoutes =
 const themeRoutes =
   require('./modules/themes/theme.routes');
 
+const brandRoutes =
+  require('./modules/branding/brand.routes');
+
 
 // ============================================================================
-// MIDDLEWARE
+// ERROR HANDLER
 // ============================================================================
 
 const errorHandler =
@@ -104,20 +93,9 @@ app.use(
 // ============================================================================
 //
 // IMPORTANT:
+// Shopify HMAC verification requires the exact raw request body.
 //
-// Shopify webhook HMAC verification requires the EXACT raw request body.
-//
-// Therefore this middleware MUST run before:
-//
-//     express.json()
-//
-// Do not move it below express.json().
-//
-// Only requests sent to:
-//
-//     /api/shopify/webhooks
-//
-// are parsed as raw Buffers.
+// This MUST be registered before express.json().
 //
 
 app.use(
@@ -130,22 +108,14 @@ app.use(
 
 
 // ============================================================================
-// NORMAL JSON BODY PARSER
+// NORMAL BODY PARSERS
 // ============================================================================
-//
-// All normal API requests use JSON.
-//
 
 app.use(
   express.json({
     limit: '10mb'
   })
 );
-
-
-// ============================================================================
-// URL-ENCODED BODY PARSER
-// ============================================================================
 
 app.use(
   express.urlencoded({
@@ -159,7 +129,10 @@ app.use(
 // HTTP LOGGER
 // ============================================================================
 
-if (process.env.NODE_ENV !== 'test') {
+if (
+  process.env.NODE_ENV !== 'test'
+) {
+
   app.use(
     morgan(
       process.env.NODE_ENV === 'production'
@@ -167,22 +140,13 @@ if (process.env.NODE_ENV !== 'test') {
         : 'dev'
     )
   );
+
 }
 
 
 // ============================================================================
 // HEALTH CHECK
 // ============================================================================
-//
-// GET /
-//
-// Used by:
-// - Railway
-// - Render
-// - Docker
-// - Load balancers
-// - Monitoring systems
-//
 
 app.get(
   '/',
@@ -212,9 +176,6 @@ app.get(
 // ============================================================================
 // API HEALTH CHECK
 // ============================================================================
-//
-// GET /api/health
-//
 
 app.get(
   '/api/health',
@@ -245,11 +206,6 @@ app.get(
 //
 // /api/auth
 //
-// Examples:
-//
-// POST /api/auth/register
-// POST /api/auth/login
-//
 
 app.use(
   '/api/auth',
@@ -267,6 +223,26 @@ app.use(
 app.use(
   '/api/stores',
   storeRoutes
+);
+
+
+// ============================================================================
+// BRANDING ROUTES
+// ============================================================================
+//
+// /api/branding
+//
+// Examples:
+//
+// POST   /api/branding/:storeId
+// GET    /api/branding/:storeId
+// PATCH  /api/branding/:storeId
+// DELETE /api/branding/:storeId
+//
+
+app.use(
+  '/api/branding',
+  brandRoutes
 );
 
 
@@ -289,11 +265,7 @@ app.use(
 //
 // IMPORTANT:
 //
-// Keep this BEFORE the normal Shopify route.
-//
-// Final endpoint:
-//
-// POST /api/shopify/webhooks
+// Raw-body middleware is already registered above.
 //
 // Flow:
 //
@@ -338,9 +310,6 @@ app.use(
 // ============================================================================
 // 404 HANDLER
 // ============================================================================
-//
-// Must remain AFTER all application routes.
-//
 
 app.use(
   (req, res) => {
