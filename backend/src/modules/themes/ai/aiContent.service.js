@@ -6144,11 +6144,11 @@ const getContentRegenerationTargets = (
 
   if (
     validation.errors.some(
-      error =>
-        .toLowerCase()
-          .includes(
-            "product"
-          )
+  error =>
+    error
+      .toLowerCase()
+      .includes("product")
+)
     )
   ) {
 
