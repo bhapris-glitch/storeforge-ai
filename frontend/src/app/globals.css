@@ -1,0 +1,544 @@
+/**
+ * ============================================================================
+ * Layboka AI
+ * Global Styles
+ * ============================================================================
+ *
+ * File:
+ * frontend/src/app/globals.css
+ *
+ * Design System:
+ * - Background: #07100A
+ * - Surface: #0B1710
+ * - Elevated Surface: #102019
+ * - Brand: #FF3B2F
+ * - Text: #FFFFFF
+ *
+ * ============================================================================
+ */
+
+@import "tailwindcss";
+
+
+/* ============================================================================
+   ROOT VARIABLES
+   ============================================================================ */
+
+:root {
+  --background: #07100A;
+  --background-soft: #09130D;
+
+  --surface: #0B1710;
+  --surface-elevated: #102019;
+  --surface-hover: #14261C;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --brand: #FF3B2F;
+  --brand-hover: #FF5147;
+  --brand-dark: #D92D23;
+  --brand-soft: rgba(255, 59, 47, 0.10);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.68);
+  --text-muted: rgba(255, 255, 255, 0.45);
+  --text-subtle: rgba(255, 255, 255, 0.30);
+
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+
+/* ============================================================================
+   RESET
+   ============================================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+html,
+body {
+  min-height: 100%;
+}
+
+
+body {
+  margin: 0;
+
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(255, 59, 47, 0.035),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 0% 100%,
+      rgba(28, 74, 48, 0.08),
+      transparent 30%
+    ),
+    var(--background);
+
+  color: var(--text-primary);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* ============================================================================
+   SELECTION
+   ============================================================================ */
+
+::selection {
+  background: rgba(255, 59, 47, 0.25);
+  color: #FFFFFF;
+}
+
+
+/* ============================================================================
+   SCROLLBAR
+   ============================================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+
+/* Firefox */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(255, 255, 255, 0.12)
+    var(--background);
+}
+
+
+/* ============================================================================
+   LINKS
+   ============================================================================ */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* ============================================================================
+   FORM ELEMENTS
+   ============================================================================ */
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.30);
+}
+
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+
+/* ============================================================================
+   IMAGE
+   ============================================================================ */
+
+img {
+  max-width: 100%;
+}
+
+
+button {
+  font: inherit;
+}
+
+
+/* ============================================================================
+   LAYOUT HELPERS
+   ============================================================================ */
+
+.page-container {
+  width: 100%;
+  max-width: 1440px;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+
+@media (max-width: 768px) {
+
+  .page-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+}
+
+
+/* ============================================================================
+   GLASS EFFECT
+   ============================================================================ */
+
+.glass {
+  background: rgba(11, 23, 16, 0.72);
+
+  border: 1px solid var(--border);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+
+.glass-strong {
+  background: rgba(11, 23, 16, 0.90);
+
+  border: 1px solid var(--border);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+
+/* ============================================================================
+   CARD
+   ============================================================================ */
+
+.surface-card {
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius-lg);
+}
+
+
+.surface-card:hover {
+  border-color: var(--border-strong);
+}
+
+
+/* ============================================================================
+   BRAND GLOW
+   ============================================================================ */
+
+.brand-glow {
+  box-shadow:
+    0 0 30px rgba(255, 59, 47, 0.12);
+}
+
+
+.brand-glow-strong {
+  box-shadow:
+    0 0 50px rgba(255, 59, 47, 0.18);
+}
+
+
+/* ============================================================================
+   TEXT HELPERS
+   ============================================================================ */
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+
+.text-brand {
+  color: var(--brand);
+}
+
+
+/* ============================================================================
+   BACKGROUND HELPERS
+   ============================================================================ */
+
+.bg-app {
+  background-color: var(--background);
+}
+
+
+.bg-surface {
+  background-color: var(--surface);
+}
+
+
+.bg-surface-elevated {
+  background-color: var(--surface-elevated);
+}
+
+
+.bg-brand {
+  background-color: var(--brand);
+}
+
+
+/* ============================================================================
+   FOCUS RING
+   ============================================================================ */
+
+.focus-brand:focus-visible {
+  outline: 2px solid var(--brand);
+
+  outline-offset: 2px;
+}
+
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeIn {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+
+@keyframes fadeInUp {
+
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+@keyframes slideIn {
+
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+}
+
+
+@keyframes pulseBrand {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 59, 47, 0);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(255, 59, 47, 0.08);
+  }
+
+}
+
+
+.animate-fade-in {
+  animation:
+    fadeIn 0.3s ease-out both;
+}
+
+
+.animate-fade-in-up {
+  animation:
+    fadeInUp 0.4s ease-out both;
+}
+
+
+.animate-slide-in {
+  animation:
+    slideIn 0.25s ease-out both;
+}
+
+
+.animate-pulse-brand {
+  animation:
+    pulseBrand 2s ease-in-out infinite;
+}
+
+
+/* ============================================================================
+   LOADING SHIMMER
+   ============================================================================ */
+
+@keyframes shimmer {
+
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+
+}
+
+
+.skeleton {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 75%
+    );
+
+  background-size: 1000px 100%;
+
+  animation:
+    shimmer 2s infinite linear;
+
+  border-radius: var(--radius-md);
+}
+
+
+/* ============================================================================
+   STATUS COLORS
+   ============================================================================ */
+
+.status-success {
+  color: var(--success);
+}
+
+
+.status-warning {
+  color: var(--warning);
+}
+
+
+.status-danger {
+  color: var(--danger);
+}
+
+
+.status-info {
+  color: var(--info);
+}
+
+
+/* ============================================================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================================================ */
+
+@media (max-width: 640px) {
+
+  h1 {
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+
+
+  h2 {
+    font-size: 1.35rem;
+    line-height: 1.25;
+  }
+
+}
+
+
+/* ============================================================================
+   REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+}
