@@ -1,5 +1,5 @@
 //==========================================================
-/) storeforge-ai/backend/src/modules/stores/store.model.js
+// storeforge-ai/backend/src/modules/stores/store.model.js
 //==========================================================
 const mongoose = require("mongoose");
 
