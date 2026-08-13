@@ -1,6 +1,8 @@
 //==========================================================
-// storeforge-ai/backend/src/modules/stores/store.model.js
+// StoreForge AI
+// backend/src/modules/stores/store.model.js
 //==========================================================
+
 const mongoose = require("mongoose");
 
 const storeSchema = new mongoose.Schema(
