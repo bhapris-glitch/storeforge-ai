@@ -1,23 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-
-// ============================================================================
-// ROUTE CONFIGURATION
-// ============================================================================
-
 const PUBLIC_ROUTES = [
+  '/',
   '/login',
   '/register',
+  '/pricing',
+  '/about',
+  '/terms',
 ];
 
-const PROTECTED_PREFIXES = [
+const PROTECTED_ROUTES = [
   '/dashboard',
+  '/store-builder',
+  '/branding',
+  '/products',
+  '/themes',
+  '/analytics',
+  '/billing',
+  '/settings',
 ];
-
-
-// ============================================================================
-// HELPERS
-// ============================================================================
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some(
@@ -27,123 +28,75 @@ function isPublicRoute(pathname: string): boolean {
   );
 }
 
-
 function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_PREFIXES.some(
-    (prefix) =>
-      pathname === prefix ||
-      pathname.startsWith(`${prefix}/`)
+  return PROTECTED_ROUTES.some(
+    (route) =>
+      pathname === route ||
+      pathname.startsWith(`${route}/`)
   );
 }
-
-
-// ============================================================================
-// MIDDLEWARE
-// ============================================================================
 
 export function middleware(
   request: NextRequest
 ) {
-
   const { pathname } = request.nextUrl;
 
-
-  // --------------------------------------------------------------------------
-  // Ignore Next.js internal routes and static files
-  // --------------------------------------------------------------------------
-
+  // Ignore Next.js internals and static files.
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
+    pathname.startsWith('/favicon.ico') ||
     pathname.includes('.')
   ) {
     return NextResponse.next();
   }
 
+  // Public pages don't require authentication.
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next();
+  }
 
-  // --------------------------------------------------------------------------
-  // Authentication token
-  // --------------------------------------------------------------------------
-  //
-  // The backend will ultimately be responsible for validating the JWT.
-  //
-  // For frontend route protection we only check whether a token exists.
-  //
-  // Never treat this check as authorization.
-  //
+  // Only apply authentication checks to protected pages.
+  if (!isProtectedRoute(pathname)) {
+    return NextResponse.next();
+  }
 
+  /*
+   * Authentication can be stored in either:
+   *
+   * 1. HTTP-only cookie: token
+   * 2. HTTP-only cookie: accessToken
+   *
+   * The backend remains the authoritative authentication layer.
+   */
   const token =
-    request.cookies.get('storeforge_token')?.value;
+    request.cookies.get('token')?.value ||
+    request.cookies.get('accessToken')?.value;
 
-
-  // --------------------------------------------------------------------------
-  // Protected dashboard routes
-  // --------------------------------------------------------------------------
-
-  if (
-    isProtectedRoute(pathname) &&
-    !token
-  ) {
-
-    const loginUrl =
-      new URL(
-        '/login',
-        request.url
-      );
-
+  if (!token) {
+    const loginUrl = new URL(
+      '/login',
+      request.url
+    );
 
     loginUrl.searchParams.set(
       'redirect',
       pathname
     );
 
-
     return NextResponse.redirect(
       loginUrl
     );
-
   }
-
-
-  // --------------------------------------------------------------------------
-  // Prevent authenticated users from unnecessarily returning to login
-  // --------------------------------------------------------------------------
-
-  if (
-    isPublicRoute(pathname) &&
-    token
-  ) {
-
-    return NextResponse.redirect(
-      new URL(
-        '/dashboard',
-        request.url
-      )
-    );
-
-  }
-
 
   return NextResponse.next();
 }
 
-
-// ============================================================================
-// MATCHER
-// ============================================================================
-
 export const config = {
-
   matcher: [
     /*
-     * Run middleware on application routes while excluding:
-     * - _next/static
-     * - _next/image
-     * - favicon
-     * - common static assets
+     * Run middleware on application routes,
+     * excluding Next.js internals and common static assets.
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)'
-
-  ]
-
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };
