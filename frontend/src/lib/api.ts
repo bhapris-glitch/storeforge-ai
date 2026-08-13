@@ -11,10 +11,10 @@
  * Central HTTP client used by the StoreForge frontend to communicate with
  * the StoreForge backend.
  *
- * NOT FOR:
- * - Chatbot communication
- * - Sales-agent conversations
- * - Chat memory
+ * IMPORTANT:
+ * - Authentication uses HTTP-only cookies when available.
+ * - Legacy localStorage token support is retained for compatibility.
+ * - OpenAI is handled by the backend. Never expose OPENAI_API_KEY here.
  *
  * ============================================================================
  */
@@ -37,23 +37,35 @@ const API_BASE_URL =
 
 export interface ApiRequestOptions
   extends RequestInit {
+
   token?: string;
+
   body?: unknown;
+
 }
 
+
 export interface ApiErrorResponse {
+
   success?: boolean;
+
   message?: string;
+
   error?: string;
+
   errors?: unknown;
+
   statusCode?: number;
+
 }
+
 
 export class ApiError extends Error {
 
   status: number;
 
   data: ApiErrorResponse | null;
+
 
   constructor(
     message: string,
@@ -75,18 +87,8 @@ export class ApiError extends Error {
 
 
 // ============================================================================
-// TOKEN HELPERS
+// TOKEN
 // ============================================================================
-//
-// Primary authentication is handled through the HTTP-only cookie:
-//
-// storeforge_token
-//
-// We do NOT need to expose the JWT to browser JavaScript.
-//
-// The localStorage fallback is provided only for development/backward
-// compatibility if an older frontend authentication flow is being used.
-//
 
 const getStoredToken = (): string | null => {
 
@@ -112,7 +114,7 @@ const getStoredToken = (): string | null => {
 
 
 // ============================================================================
-// REQUEST URL
+// URL
 // ============================================================================
 
 const buildUrl = (
@@ -120,8 +122,12 @@ const buildUrl = (
 ): string => {
 
   if (
-    endpoint.startsWith('http://') ||
-    endpoint.startsWith('https://')
+    endpoint.startsWith(
+      'http://'
+    ) ||
+    endpoint.startsWith(
+      'https://'
+    )
   ) {
 
     return endpoint;
@@ -135,7 +141,84 @@ const buildUrl = (
       : `/${endpoint}`;
 
 
-  return `${API_BASE_URL}${normalizedEndpoint}`;
+  return (
+    `${API_BASE_URL}${normalizedEndpoint}`
+  );
+
+};
+
+
+// ============================================================================
+// QUERY STRING
+// ============================================================================
+
+const buildQueryString = (
+  params?: Record<string, unknown>
+): string => {
+
+  if (!params) {
+
+    return '';
+
+  }
+
+
+  const searchParams =
+    new URLSearchParams();
+
+
+  Object.entries(
+    params
+  ).forEach(
+    ([key, value]) => {
+
+      if (
+        value === undefined ||
+        value === null ||
+        value === ''
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        Array.isArray(value)
+      ) {
+
+        value.forEach(
+          (item) => {
+
+            searchParams.append(
+              key,
+              String(item)
+            );
+
+          }
+        );
+
+        return;
+
+      }
+
+
+      searchParams.set(
+        key,
+        String(value)
+      );
+
+    }
+  );
+
+
+  const query =
+    searchParams.toString();
+
+
+  return query
+    ? `?${query}`
+    : '';
 
 };
 
@@ -280,10 +363,6 @@ export async function apiRequest<T = unknown>(
     );
 
 
-  // --------------------------------------------------------------------------
-  // JSON content type
-  // --------------------------------------------------------------------------
-
   if (
     body !== undefined &&
     !(body instanceof FormData)
@@ -296,17 +375,6 @@ export async function apiRequest<T = unknown>(
 
   }
 
-
-  // --------------------------------------------------------------------------
-  // Authorization
-  // --------------------------------------------------------------------------
-  //
-  // If using the HTTP-only cookie, the browser sends it automatically because
-  // credentials are included below.
-  //
-  // If an older/local development flow stores the token in localStorage,
-  // Authorization is also supported.
-  //
 
   if (storedToken) {
 
@@ -371,10 +439,6 @@ export async function apiRequest<T = unknown>(
       response
     );
 
-
-  // --------------------------------------------------------------------------
-  // Handle failed responses
-  // --------------------------------------------------------------------------
 
   if (!response.ok) {
 
@@ -834,6 +898,7 @@ export const themeApi = {
     return api.patch<T>(
       `/themes/${storeId}/${themeId}`,
       data
+
     );
 
   },
@@ -933,6 +998,283 @@ export const billingApi = {
 
     return api.post<T>(
       '/billing/cancel'
+    );
+
+  }
+
+};
+
+
+// ============================================================================
+// ANALYTICS API
+// ============================================================================
+
+export const analyticsApi = {
+
+  dashboard: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/dashboard${buildQueryString(params)}`
+    );
+
+  },
+
+
+  store: <T = unknown>(
+    storeId: string,
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/stores/${storeId}${buildQueryString(params)}`
+    );
+
+  },
+
+
+  products: <T = unknown>(
+    storeId: string,
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/products/${storeId}${buildQueryString(params)}`
+    );
+
+  },
+
+
+  themes: <T = unknown>(
+    storeId: string,
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/themes/${storeId}${buildQueryString(params)}`
+    );
+
+  },
+
+
+  deployments: <T = unknown>(
+    storeId: string,
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/deployments/${storeId}${buildQueryString(params)}`
+    );
+
+  },
+
+
+  revenue: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/revenue${buildQueryString(params)}`
+    );
+
+  },
+
+
+  usage: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/analytics/usage${buildQueryString(params)}`
+    );
+
+  }
+
+};
+
+
+// ============================================================================
+// ADMIN API
+// ============================================================================
+
+export const adminApi = {
+
+  stats: <T = unknown>() => {
+
+    return api.get<T>(
+      '/admin/stats'
+    );
+
+  },
+
+
+  users: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/admin/users${buildQueryString(params)}`
+    );
+
+  },
+
+
+  user: <T = unknown>(
+    userId: string
+  ) => {
+
+    return api.get<T>(
+      `/admin/users/${userId}`
+    );
+
+  },
+
+
+  updateUser: <T = unknown>(
+    userId: string,
+    data: Record<string, unknown>
+  ) => {
+
+    return api.patch<T>(
+      `/admin/users/${userId}`,
+      data
+    );
+
+  },
+
+
+  stores: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/admin/stores${buildQueryString(params)}`
+    );
+
+  },
+
+
+  store: <T = unknown>(
+    storeId: string
+  ) => {
+
+    return api.get<T>(
+      `/admin/stores/${storeId}`
+    );
+
+  },
+
+
+  updateStore: <T = unknown>(
+    storeId: string,
+    data: Record<string, unknown>
+  ) => {
+
+    return api.patch<T>(
+      `/admin/stores/${storeId}`,
+      data
+    );
+
+  },
+
+
+  subscriptions: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) => {
+
+    return api.get<T>(
+      `/admin/subscriptions${buildQueryString(params)}`
+    );
+
+  },
+
+
+  updateSubscription: <T = unknown>(
+    subscriptionId: string,
+    data: Record<string, unknown>
+  ) => {
+
+    return api.patch<T>(
+      `/admin/subscriptions/${subscriptionId}`,
+      data
+    );
+
+  },
+
+
+  health: <T = unknown>() => {
+
+    return api.get<T>(
+      '/admin/health'
+    );
+
+  }
+
+};
+
+
+// ============================================================================
+// DEPLOYMENT API
+// ============================================================================
+
+export const deploymentApi = {
+
+  list: <T = unknown>(
+    storeId: string
+  ) => {
+
+    return api.get<T>(
+      `/deployments/${storeId}`
+    );
+
+  },
+
+
+  get: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) => {
+
+    return api.get<T>(
+      `/deployments/${storeId}/${deploymentId}`
+    );
+
+  },
+
+
+  create: <T = unknown>(
+    storeId: string,
+    data: Record<string, unknown>
+  ) => {
+
+    return api.post<T>(
+      `/deployments/${storeId}`,
+      data
+    );
+
+  },
+
+
+  status: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) => {
+
+    return api.get<T>(
+      `/deployments/${storeId}/${deploymentId}/status`
+    );
+
+  },
+
+
+  cancel: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) => {
+
+    return api.post<T>(
+      `/deployments/${storeId}/${deploymentId}/cancel`
     );
 
   }
