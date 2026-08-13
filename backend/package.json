@@ -2,10 +2,10 @@
   "name": "storeforge-ai-backend",
   "version": "1.0.0",
   "description": "StoreForge AI SaaS Backend",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-"start": "node src/server.js"
+    "start": "node src/server.js"
   },
   "keywords": [
     "shopify",
@@ -17,6 +17,7 @@
   "author": "StoreForge AI",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -25,7 +26,10 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "openai": "^5.12.2",
+    "redis": "^5.8.1",
+    "stripe": "^18.4.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
