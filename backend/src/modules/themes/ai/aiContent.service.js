@@ -6159,22 +6159,19 @@ const getContentRegenerationTargets = (
   }
 
   if (
-    validation.errors.some(
-      error =>
-        error
-          .toLowerCase()
-          .includes(
-            "collection"
-          )
-    )
-  ) {
-
-    targets.push(
-      "collections"
-    );
-    );
-
-  }
+  validation.errors.some(
+    error =>
+      error
+        .toLowerCase()
+        .includes(
+          "collection"
+        )
+  )
+) {
+  targets.push(
+    "collections"
+  );
+}
 
   if (
     validation.errors.some(
