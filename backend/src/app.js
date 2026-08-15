@@ -44,6 +44,9 @@ const brandRoutes =
 const productRoutes =
   require('./modules/products/product.routes');
 
+const analyticsRoutes =
+  require('./modules/analytics/analytics.routes');
+
 
 // ============================================================================
 // BILLING
@@ -386,6 +389,16 @@ app.use(
   '/api/shopify',
   shopifyRoutes
 );
+
+//========================================================
+
+app.use(
+  '/api/analytics',
+  analyticsRoutes
+);
+
+// ======================================================
+
 
 
 // ============================================================================
