@@ -47,6 +47,9 @@ const productRoutes =
 const analyticsRoutes =
   require('./modules/analytics/analytics.routes');
 
+const adminRoutes =
+  require('./modules/admin/admin.routes');
+
 
 // ============================================================================
 // BILLING
@@ -399,6 +402,12 @@ app.use(
 
 // ======================================================
 
+app.use(
+  '/api/admin',
+  adminRoutes
+);
+
+// ==========================================================
 
 
 // ============================================================================
