@@ -8,15 +8,17 @@
  * frontend/src/services/admin.service.ts
  *
  * Purpose:
- * - Admin dashboard statistics
- * - User management
- * - Store management
- * - Subscription management
- * - System statistics
+ * Frontend service layer for the StoreForge AI admin panel.
  *
  * IMPORTANT:
- * - All authorization must be enforced by the backend.
- * - Frontend role checks are NOT a security boundary.
+ * These methods correspond to the actual backend Admin routes:
+ *
+ * /api/admin/dashboard
+ * /api/admin/overview
+ * /api/admin/users
+ * /api/admin/stores
+ * /api/admin/billing
+ * /api/admin/recent/*
  *
  * ============================================================================
  */
@@ -24,7 +26,7 @@
 'use client';
 
 import {
-  adminApi
+  adminApi,
 } from '@/lib/api';
 
 
@@ -32,52 +34,15 @@ import {
 // TYPES
 // ============================================================================
 
-export interface AdminStats {
-
-  totalUsers?: number;
-
-  activeUsers?: number;
-
-  totalStores?: number;
-
-  activeStores?: number;
-
-  connectedStores?: number;
-
-  totalProducts?: number;
-
-  totalThemes?: number;
-
-  totalDeployments?: number;
-
-  successfulDeployments?: number;
-
-  failedDeployments?: number;
-
-  activeSubscriptions?: number;
-
-  trialSubscriptions?: number;
-
-  cancelledSubscriptions?: number;
-
-  monthlyRevenue?: number;
-
-  totalRevenue?: number;
-
-  currency?: string;
-
-}
-
-
 export interface AdminUser {
-
-  id: string;
 
   _id?: string;
 
+  id?: string;
+
   name?: string;
 
-  email: string;
+  email?: string;
 
   role?: string;
 
@@ -87,39 +52,35 @@ export interface AdminUser {
 
   updatedAt?: string;
 
+  [key: string]: unknown;
 }
 
 
 export interface AdminStore {
 
-  id: string;
-
   _id?: string;
 
-  userId?: string;
+  id?: string;
 
   name?: string;
 
-  shopifyDomain?: string;
+  shopDomain?: string;
 
-  customDomain?: string;
-
-  platform?: string;
+  domain?: string;
 
   status?: string;
 
-  isConnected?: boolean;
+  userId?: string;
 
   createdAt?: string;
 
   updatedAt?: string;
 
+  [key: string]: unknown;
 }
 
 
-export interface AdminSubscription {
-
-  id: string;
+export interface AdminBilling {
 
   _id?: string;
 
@@ -131,12 +92,6 @@ export interface AdminSubscription {
 
   status?: string;
 
-  price?: number;
-
-  currency?: string;
-
-  interval?: string;
-
   stripeCustomerId?: string;
 
   stripeSubscriptionId?: string;
@@ -145,12 +100,11 @@ export interface AdminSubscription {
 
   currentPeriodEnd?: string;
 
-  cancelAtPeriodEnd?: boolean;
-
   createdAt?: string;
 
   updatedAt?: string;
 
+  [key: string]: unknown;
 }
 
 
@@ -158,20 +112,25 @@ export interface AdminSubscription {
 // RESPONSE TYPES
 // ============================================================================
 
-export interface AdminStatsResponse {
+export interface AdminDashboardResponse {
+
+  success?: boolean;
+
+  dashboard?: Record<string, unknown>;
+
+  message?: string;
+
+  [key: string]: unknown;
+}
+
+
+export interface AdminOverviewResponse {
 
   success?: boolean;
 
   message?: string;
 
-  stats?: AdminStats;
-
-  data?:
-    | AdminStats
-    | {
-        stats?: AdminStats;
-      };
-
+  [key: string]: unknown;
 }
 
 
@@ -179,16 +138,31 @@ export interface AdminUsersResponse {
 
   success?: boolean;
 
-  message?: string;
-
   users?: AdminUser[];
 
-  data?:
-    | AdminUser[]
-    | {
-        users?: AdminUser[];
-      };
+  total?: number;
 
+  page?: number;
+
+  limit?: number;
+
+  pages?: number;
+
+  message?: string;
+
+  [key: string]: unknown;
+}
+
+
+export interface AdminUserResponse {
+
+  success?: boolean;
+
+  user?: AdminUser;
+
+  message?: string;
+
+  [key: string]: unknown;
 }
 
 
@@ -196,44 +170,63 @@ export interface AdminStoresResponse {
 
   success?: boolean;
 
-  message?: string;
-
   stores?: AdminStore[];
 
-  data?:
-    | AdminStore[]
-    | {
-        stores?: AdminStore[];
-      };
+  total?: number;
 
-}
+  page?: number;
 
+  limit?: number;
 
-export interface AdminSubscriptionsResponse {
-
-  success?: boolean;
+  pages?: number;
 
   message?: string;
 
-  subscriptions?: AdminSubscription[];
-
-  data?:
-    | AdminSubscription[]
-    | {
-        subscriptions?: AdminSubscription[];
-      };
-
+  [key: string]: unknown;
 }
 
 
-export interface AdminActionResponse {
+export interface AdminStoreResponse {
 
   success?: boolean;
 
+  store?: AdminStore;
+
   message?: string;
 
-  data?: unknown;
+  [key: string]: unknown;
+}
 
+
+export interface AdminBillingResponse {
+
+  success?: boolean;
+
+  billing?: AdminBilling[];
+
+  total?: number;
+
+  page?: number;
+
+  limit?: number;
+
+  pages?: number;
+
+  message?: string;
+
+  [key: string]: unknown;
+}
+
+
+export interface AdminCountsResponse {
+
+  success?: boolean;
+
+  counts?: Record<string, unknown>;
+
+  message?: string;
+
+  [key: string]: unknown;
 }
 
 
@@ -254,183 +247,32 @@ export interface AdminListParams {
   role?: string;
 
   plan?: string;
-
-  sort?: string;
-
-  order?: 'asc' | 'desc';
-
 }
 
 
 // ============================================================================
-// RESPONSE HELPERS
+// DASHBOARD
 // ============================================================================
 
-function extractStats(
-  response: AdminStatsResponse
-): AdminStats {
-
-  if (response.stats) {
-
-    return response.stats;
-
-  }
-
-
-  if (
-    response.data &&
-    !Array.isArray(response.data)
-  ) {
-
-    if (
-      'stats' in response.data &&
-      response.data.stats
-    ) {
-
-      return response.data.stats;
-
-    }
-
-
-    return response.data as AdminStats;
-
-  }
-
-
-  return {};
-
-}
-
-
-function extractUsers(
-  response: AdminUsersResponse
-): AdminUser[] {
-
-  if (
-    Array.isArray(response.users)
-  ) {
-
-    return response.users;
-
-  }
-
-
-  if (
-    Array.isArray(response.data)
-  ) {
-
-    return response.data;
-
-  }
-
-
-  if (
-    response.data &&
-    !Array.isArray(response.data) &&
-    Array.isArray(response.data.users)
-  ) {
-
-    return response.data.users;
-
-  }
-
-
-  return [];
-
-}
-
-
-function extractStores(
-  response: AdminStoresResponse
-): AdminStore[] {
-
-  if (
-    Array.isArray(response.stores)
-  ) {
-
-    return response.stores;
-
-  }
-
-
-  if (
-    Array.isArray(response.data)
-  ) {
-
-    return response.data;
-
-  }
-
-
-  if (
-    response.data &&
-    !Array.isArray(response.data) &&
-    Array.isArray(response.data.stores)
-  ) {
-
-    return response.data.stores;
-
-  }
-
-
-  return [];
-
-}
-
-
-function extractSubscriptions(
-  response: AdminSubscriptionsResponse
-): AdminSubscription[] {
-
-  if (
-    Array.isArray(response.subscriptions)
-  ) {
-
-    return response.subscriptions;
-
-  }
-
-
-  if (
-    Array.isArray(response.data)
-  ) {
-
-    return response.data;
-
-  }
-
-
-  if (
-    response.data &&
-    !Array.isArray(response.data) &&
-    Array.isArray(response.data.subscriptions)
-  ) {
-
-    return response.data.subscriptions;
-
-  }
-
-
-  return [];
-
-}
-
-
-// ============================================================================
-// DASHBOARD STATISTICS
-// ============================================================================
-
-export async function getAdminStats()
-: Promise<AdminStats> {
+export async function getDashboard() {
 
   const response =
-    await adminApi.stats<AdminStatsResponse>();
+    await adminApi.dashboard<AdminDashboardResponse>();
+
+  return response;
+}
 
 
-  return extractStats(
-    response
-  );
+// ============================================================================
+// SYSTEM OVERVIEW
+// ============================================================================
 
+export async function getOverview() {
+
+  const response =
+    await adminApi.overview<AdminOverviewResponse>();
+
+  return response;
 }
 
 
@@ -440,101 +282,130 @@ export async function getAdminStats()
 
 export async function getUsers(
   params: AdminListParams = {}
-): Promise<AdminUser[]> {
+) {
 
   const response =
     await adminApi.users<AdminUsersResponse>(
-      params as Record<string, unknown>
+      params
     );
 
-
-  return extractUsers(
-    response
-  );
-
+  return response;
 }
 
-
-// ============================================================================
-// SINGLE USER
-// ============================================================================
 
 export async function getUser(
   userId: string
-): Promise<AdminUser> {
+) {
 
   if (!userId) {
-
     throw new Error(
       'User ID is required.'
     );
-
   }
 
-
   const response =
-    await adminApi.user<{
-      success?: boolean;
-      message?: string;
-      user?: AdminUser;
-      data?: AdminUser | { user?: AdminUser };
-    }>(
+    await adminApi.user<AdminUserResponse>(
       userId
     );
 
-
-  const user =
-    response.user ||
-    (
-      response.data &&
-      !('user' in response.data)
-        ? response.data
-        : response.data?.user
-    );
+  return response;
+}
 
 
-  if (!user) {
+export async function getUserCounts() {
 
-    throw new Error(
-      'User was not returned by the server.'
-    );
+  const response =
+    await adminApi.userCounts<AdminCountsResponse>();
 
-  }
-
-
-  return user as AdminUser;
-
+  return response;
 }
 
 
 // ============================================================================
-// UPDATE USER
+// USER STATUS
 // ============================================================================
 
-export async function updateUser(
+export async function updateUserStatus(
   userId: string,
-  data: {
-    name?: string;
-    email?: string;
-    role?: string;
-    status?: string;
-  }
-): Promise<void> {
+  status: string
+) {
 
   if (!userId) {
-
     throw new Error(
       'User ID is required.'
     );
-
   }
 
+  if (!status) {
+    throw new Error(
+      'User status is required.'
+    );
+  }
 
-  await adminApi.updateUser(
-    userId,
-    data as Record<string, unknown>
-  );
+  const response =
+    await adminApi.updateUserStatus<AdminUserResponse>(
+      userId,
+      status
+    );
 
+  return response;
+}
+
+
+export async function activateUser(
+  userId: string
+) {
+
+  if (!userId) {
+    throw new Error(
+      'User ID is required.'
+    );
+  }
+
+  const response =
+    await adminApi.activateUser<AdminUserResponse>(
+      userId
+    );
+
+  return response;
+}
+
+
+export async function suspendUser(
+  userId: string
+) {
+
+  if (!userId) {
+    throw new Error(
+      'User ID is required.'
+    );
+  }
+
+  const response =
+    await adminApi.suspendUser<AdminUserResponse>(
+      userId
+    );
+
+  return response;
+}
+
+
+export async function deleteUser(
+  userId: string
+) {
+
+  if (!userId) {
+    throw new Error(
+      'User ID is required.'
+    );
+  }
+
+  const response =
+    await adminApi.deleteUser<AdminUserResponse>(
+      userId
+    );
+
+  return response;
 }
 
 
@@ -544,189 +415,195 @@ export async function updateUser(
 
 export async function getStores(
   params: AdminListParams = {}
-): Promise<AdminStore[]> {
+) {
 
   const response =
     await adminApi.stores<AdminStoresResponse>(
-      params as Record<string, unknown>
+      params
     );
 
-
-  return extractStores(
-    response
-  );
-
+  return response;
 }
 
-
-// ============================================================================
-// SINGLE STORE
-// ============================================================================
 
 export async function getStore(
   storeId: string
-): Promise<AdminStore> {
+) {
 
   if (!storeId) {
-
     throw new Error(
       'Store ID is required.'
     );
-
   }
 
-
   const response =
-    await adminApi.store<{
-      success?: boolean;
-      message?: string;
-      store?: AdminStore;
-      data?: AdminStore | { store?: AdminStore };
-    }>(
+    await adminApi.store<AdminStoreResponse>(
       storeId
     );
 
-
-  const store =
-    response.store ||
-    (
-      response.data &&
-      !('store' in response.data)
-        ? response.data
-        : response.data?.store
-    );
+  return response;
+}
 
 
-  if (!store) {
+export async function getStoreCounts() {
 
-    throw new Error(
-      'Store was not returned by the server.'
-    );
+  const response =
+    await adminApi.storeCounts<AdminCountsResponse>();
 
-  }
-
-
-  return store as AdminStore;
-
+  return response;
 }
 
 
 // ============================================================================
-// UPDATE STORE
+// STORE STATUS
 // ============================================================================
 
-export async function updateStore(
+export async function updateStoreStatus(
   storeId: string,
-  data: {
-    name?: string;
-    status?: string;
-  }
-): Promise<void> {
+  status: string
+) {
 
   if (!storeId) {
-
     throw new Error(
       'Store ID is required.'
     );
-
   }
 
-
-  await adminApi.updateStore(
-    storeId,
-    data as Record<string, unknown>
-  );
-
-}
-
-
-// ============================================================================
-// SUBSCRIPTIONS
-// ============================================================================
-
-export async function getSubscriptions(
-  params: AdminListParams = {}
-): Promise<AdminSubscription[]> {
+  if (!status) {
+    throw new Error(
+      'Store status is required.'
+    );
+  }
 
   const response =
-    await adminApi.subscriptions<AdminSubscriptionsResponse>(
-      params as Record<string, unknown>
+    await adminApi.updateStoreStatus<AdminStoreResponse>(
+      storeId,
+      status
     );
 
-
-  return extractSubscriptions(
-    response
-  );
-
+  return response;
 }
 
 
 // ============================================================================
-// UPDATE SUBSCRIPTION
+// BILLING
 // ============================================================================
 
-export async function updateSubscription(
-  subscriptionId: string,
-  data: {
-    plan?: string;
-    status?: string;
-  }
-): Promise<void> {
+export async function getBilling(
+  params: AdminListParams = {}
+) {
 
-  if (!subscriptionId) {
-
-    throw new Error(
-      'Subscription ID is required.'
+  const response =
+    await adminApi.billing<AdminBillingResponse>(
+      params
     );
 
-  }
+  return response;
+}
 
 
-  await adminApi.updateSubscription(
-    subscriptionId,
-    data as Record<string, unknown>
-  );
+export async function getBillingSummary() {
 
+  const response =
+    await adminApi.billingSummary<
+      Record<string, unknown>
+    >();
+
+  return response;
 }
 
 
 // ============================================================================
-// SYSTEM HEALTH
+// RECENT ACTIVITY
 // ============================================================================
 
-export async function getSystemHealth()
-: Promise<unknown> {
+export async function getRecentUsers(
+  limit = 10
+) {
 
-  return adminApi.health();
+  const safeLimit =
+    Math.min(
+      Math.max(
+        Number(limit) || 10,
+        1
+      ),
+      100
+    );
 
+  const response =
+    await adminApi.recentUsers<
+      AdminUsersResponse
+    >(
+      safeLimit
+    );
+
+  return response;
+}
+
+
+export async function getRecentStores(
+  limit = 10
+) {
+
+  const safeLimit =
+    Math.min(
+      Math.max(
+        Number(limit) || 10,
+        1
+      ),
+      100
+    );
+
+  const response =
+    await adminApi.recentStores<
+      AdminStoresResponse
+    >(
+      safeLimit
+    );
+
+  return response;
 }
 
 
 // ============================================================================
-// DEFAULT EXPORT
+// DEFAULT SERVICE
 // ============================================================================
 
 const adminService = {
 
-  getAdminStats,
+  getDashboard,
+
+  getOverview,
 
   getUsers,
 
   getUser,
 
-  updateUser,
+  getUserCounts,
+
+  updateUserStatus,
+
+  activateUser,
+
+  suspendUser,
+
+  deleteUser,
 
   getStores,
 
   getStore,
 
-  updateStore,
+  getStoreCounts,
 
-  getSubscriptions,
+  updateStoreStatus,
 
-  updateSubscription,
+  getBilling,
 
-  getSystemHealth
+  getBillingSummary,
+
+  getRecentUsers,
+
+  getRecentStores,
 
 };
 
