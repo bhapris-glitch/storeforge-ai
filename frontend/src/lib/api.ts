@@ -1,62 +1,35 @@
-/**
- * ============================================================================
- * StoreForge AI
- * Frontend API Client
- * ============================================================================
- *
- * File:
- * frontend/src/lib/api.ts
- *
- * Purpose:
- * Central HTTP client used by the StoreForge frontend to communicate with
- * the StoreForge backend.
- *
- * IMPORTANT:
- * - Authentication uses HTTP-only cookies when available.
- * - Legacy localStorage token support is retained for compatibility.
- * - OpenAI is handled by the backend. Never expose OPENAI_API_KEY here.
- *
- * ============================================================================
- */
+// ============================================================================
+// StoreForge AI
+// Frontend API Client
+// ============================================================================
 
 'use client';
+
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+} from 'axios';
 
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
 
-const API_BASE_URL =
+const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:5000/api';
 
 
 // ============================================================================
-// TYPES
+// API ERROR
 // ============================================================================
 
-export interface ApiRequestOptions
-  extends RequestInit {
-
-  token?: string;
-
-  body?: unknown;
-
-}
-
-
 export interface ApiErrorResponse {
-
   success?: boolean;
-
   message?: string;
-
   error?: string;
-
   errors?: unknown;
-
-  statusCode?: number;
-
 }
 
 
@@ -64,15 +37,13 @@ export class ApiError extends Error {
 
   status: number;
 
-  data: ApiErrorResponse | null;
-
+  data?: ApiErrorResponse;
 
   constructor(
     message: string,
     status = 500,
-    data: ApiErrorResponse | null = null
+    data?: ApiErrorResponse
   ) {
-
     super(message);
 
     this.name = 'ApiError';
@@ -80,96 +51,22 @@ export class ApiError extends Error {
     this.status = status;
 
     this.data = data;
-
   }
-
 }
 
 
 // ============================================================================
-// TOKEN
+// QUERY BUILDER
 // ============================================================================
 
-const getStoredToken = (): string | null => {
-
-  if (
-    typeof window === 'undefined'
-  ) {
-
-    return null;
-
-  }
-
-
-  return (
-    localStorage.getItem(
-      'storeforge_token'
-    ) ||
-    localStorage.getItem(
-      'token'
-    )
-  );
-
-};
-
-
-// ============================================================================
-// URL
-// ============================================================================
-
-const buildUrl = (
-  endpoint: string
-): string => {
-
-  if (
-    endpoint.startsWith(
-      'http://'
-    ) ||
-    endpoint.startsWith(
-      'https://'
-    )
-  ) {
-
-    return endpoint;
-
-  }
-
-
-  const normalizedEndpoint =
-    endpoint.startsWith('/')
-      ? endpoint
-      : `/${endpoint}`;
-
-
-  return (
-    `${API_BASE_URL}${normalizedEndpoint}`
-  );
-
-};
-
-
-// ============================================================================
-// QUERY STRING
-// ============================================================================
-
-const buildQueryString = (
-  params?: Record<string, unknown>
-): string => {
-
-  if (!params) {
-
-    return '';
-
-  }
-
+export function buildQueryString(
+  params: Record<string, unknown> = {}
+): string {
 
   const searchParams =
     new URLSearchParams();
 
-
-  Object.entries(
-    params
-  ).forEach(
+  Object.entries(params).forEach(
     ([key, value]) => {
 
       if (
@@ -177,425 +74,237 @@ const buildQueryString = (
         value === null ||
         value === ''
       ) {
-
         return;
-
       }
-
 
       if (
         Array.isArray(value)
       ) {
-
         value.forEach(
           (item) => {
-
             searchParams.append(
               key,
               String(item)
             );
-
           }
         );
 
         return;
-
       }
-
 
       searchParams.set(
         key,
         String(value)
       );
-
     }
   );
-
 
   const query =
     searchParams.toString();
 
-
   return query
     ? `?${query}`
     : '';
-
-};
-
-
-// ============================================================================
-// RESPONSE PARSER
-// ============================================================================
-
-const parseResponse = async (
-  response: Response
-): Promise<unknown> => {
-
-  const contentType =
-    response.headers.get(
-      'content-type'
-    ) || '';
-
-
-  if (
-    contentType.includes(
-      'application/json'
-    )
-  ) {
-
-    try {
-
-      return await response.json();
-
-    } catch {
-
-      return null;
-
-    }
-
-  }
-
-
-  return await response.text();
-
-};
-
-
-// ============================================================================
-// ERROR MESSAGE
-// ============================================================================
-
-const getErrorMessage = (
-  data: unknown,
-  status: number
-): string => {
-
-  if (
-    data &&
-    typeof data === 'object'
-  ) {
-
-    const errorData =
-      data as ApiErrorResponse;
-
-
-    if (
-      typeof errorData.message === 'string' &&
-      errorData.message.trim()
-    ) {
-
-      return errorData.message;
-
-    }
-
-
-    if (
-      typeof errorData.error === 'string' &&
-      errorData.error.trim()
-    ) {
-
-      return errorData.error;
-
-    }
-
-  }
-
-
-  switch (status) {
-
-    case 400:
-      return 'Invalid request.';
-
-    case 401:
-      return 'Authentication required.';
-
-    case 403:
-      return 'You do not have permission to perform this action.';
-
-    case 404:
-      return 'The requested resource was not found.';
-
-    case 409:
-      return 'The request conflicts with existing data.';
-
-    case 422:
-      return 'The submitted data is invalid.';
-
-    case 429:
-      return 'Too many requests. Please try again later.';
-
-    case 500:
-      return 'Server error. Please try again later.';
-
-    default:
-      return `Request failed with status ${status}.`;
-
-  }
-
-};
-
-
-// ============================================================================
-// CORE REQUEST
-// ============================================================================
-
-export async function apiRequest<T = unknown>(
-  endpoint: string,
-  options: ApiRequestOptions = {}
-): Promise<T> {
-
-  const {
-    token,
-    body,
-    headers,
-    ...requestOptions
-  } = options;
-
-
-  const storedToken =
-    token ||
-    getStoredToken();
-
-
-  const requestHeaders =
-    new Headers(
-      headers
-    );
-
-
-  if (
-    body !== undefined &&
-    !(body instanceof FormData)
-  ) {
-
-    requestHeaders.set(
-      'Content-Type',
-      'application/json'
-    );
-
-  }
-
-
-  if (storedToken) {
-
-    requestHeaders.set(
-      'Authorization',
-      `Bearer ${storedToken}`
-    );
-
-  }
-
-
-  const requestBody =
-    body === undefined
-      ? undefined
-      : body instanceof FormData
-        ? body
-        : JSON.stringify(body);
-
-
-  let response: Response;
-
-
-  try {
-
-    response =
-      await fetch(
-        buildUrl(endpoint),
-        {
-
-          ...requestOptions,
-
-          headers:
-            requestHeaders,
-
-          credentials:
-            'include',
-
-          body:
-            requestBody
-
-        }
-      );
-
-  } catch (error) {
-
-    throw new ApiError(
-      'Unable to connect to the StoreForge server.',
-      0,
-      {
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Network error'
-      }
-    );
-
-  }
-
-
-  const data =
-    await parseResponse(
-      response
-    );
-
-
-  if (!response.ok) {
-
-    throw new ApiError(
-
-      getErrorMessage(
-        data,
-        response.status
-      ),
-
-      response.status,
-
-      data &&
-      typeof data === 'object'
-        ? data as ApiErrorResponse
-        : null
-
-    );
-
-  }
-
-
-  return data as T;
-
 }
 
 
 // ============================================================================
-// HTTP METHODS
+// AXIOS CLIENT
 // ============================================================================
 
-export const api = {
+const api: AxiosInstance =
+  axios.create({
 
-  get: <T = unknown>(
-    endpoint: string,
-    options: Omit<
-      ApiRequestOptions,
-      'body'
-    > = {}
-  ) => {
+    baseURL: API_URL,
 
-    return apiRequest<T>(
-      endpoint,
-      {
+    headers: {
+      'Content-Type':
+        'application/json',
+    },
 
-        ...options,
+    withCredentials: true,
 
-        method:
-          'GET'
+    timeout: 30000,
+  });
 
+
+// ============================================================================
+// REQUEST INTERCEPTOR
+// ============================================================================
+
+api.interceptors.request.use(
+  (config) => {
+
+    if (
+      typeof window !==
+      'undefined'
+    ) {
+
+      const token =
+        localStorage.getItem(
+          'accessToken'
+        ) ||
+        localStorage.getItem(
+          'token'
+        );
+
+      if (token) {
+
+        config.headers =
+          config.headers || {};
+
+        config.headers.Authorization =
+          `Bearer ${token}`;
       }
-    );
+    }
 
-  },
-
-
-  post: <T = unknown>(
-    endpoint: string,
-    body?: unknown,
-    options: Omit<
-      ApiRequestOptions,
-      'body'
-    > = {}
-  ) => {
-
-    return apiRequest<T>(
-      endpoint,
-      {
-
-        ...options,
-
-        method:
-          'POST',
-
-        body
-
-      }
-    );
-
-  },
-
-
-  put: <T = unknown>(
-    endpoint: string,
-    body?: unknown,
-    options: Omit<
-      ApiRequestOptions,
-      'body'
-    > = {}
-  ) => {
-
-    return apiRequest<T>(
-      endpoint,
-      {
-
-        ...options,
-
-        method:
-          'PUT',
-
-        body
-
-      }
-    );
-
-  },
-
-
-  patch: <T = unknown>(
-    endpoint: string,
-    body?: unknown,
-    options: Omit<
-      ApiRequestOptions,
-      'body'
-    > = {}
-  ) => {
-
-    return apiRequest<T>(
-      endpoint,
-      {
-
-        ...options,
-
-        method:
-          'PATCH',
-
-        body
-
-      }
-    );
-
-  },
-
-
-  delete: <T = unknown>(
-    endpoint: string,
-    options: Omit<
-      ApiRequestOptions,
-      'body'
-    > = {}
-  ) => {
-
-    return apiRequest<T>(
-      endpoint,
-      {
-
-        ...options,
-
-        method:
-          'DELETE'
-
-      }
-    );
-
+    return config;
   }
+);
 
-};
+
+// ============================================================================
+// RESPONSE INTERCEPTOR
+// ============================================================================
+
+api.interceptors.response.use(
+  (response) =>
+    response,
+
+  (error: AxiosError<ApiErrorResponse>) => {
+
+    const status =
+      error.response?.status ||
+      500;
+
+    const data =
+      error.response?.data;
+
+    const message =
+      data?.message ||
+      data?.error ||
+      error.message ||
+      'Request failed.';
+
+    if (
+      status === 401 &&
+      typeof window !==
+        'undefined'
+    ) {
+
+      localStorage.removeItem(
+        'accessToken'
+      );
+
+      localStorage.removeItem(
+        'token'
+      );
+    }
+
+    return Promise.reject(
+      new ApiError(
+        message,
+        status,
+        data
+      )
+    );
+  }
+);
+
+
+// ============================================================================
+// GENERIC REQUEST HELPERS
+// ============================================================================
+
+export async function get<
+  T = unknown
+>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> {
+
+  const response =
+    await api.get<T>(
+      url,
+      config
+    );
+
+  return response.data;
+}
+
+
+export async function post<
+  T = unknown
+>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> {
+
+  const response =
+    await api.post<T>(
+      url,
+      data,
+      config
+    );
+
+  return response.data;
+}
+
+
+export async function put<
+  T = unknown
+>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> {
+
+  const response =
+    await api.put<T>(
+      url,
+      data,
+      config
+    );
+
+  return response.data;
+}
+
+
+export async function patch<
+  T = unknown
+>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> {
+
+  const response =
+    await api.patch<T>(
+      url,
+      data,
+      config
+    );
+
+  return response.data;
+}
+
+
+export async function del<
+  T = unknown
+>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> {
+
+  const response =
+    await api.delete<T>(
+      url,
+      config
+    );
+
+  return response.data;
+}
 
 
 // ============================================================================
@@ -604,53 +313,53 @@ export const api = {
 
 export const authApi = {
 
-  login: <T = unknown>(
-    data: {
-      email: string;
-      password: string;
-    }
-  ) => {
-
-    return api.post<T>(
-      '/auth/login',
-      data
-    );
-
-  },
-
-
   register: <T = unknown>(
-    data: {
-      name: string;
-      email: string;
-      password: string;
-    }
-  ) => {
-
-    return api.post<T>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
       '/auth/register',
       data
-    );
+    ),
 
-  },
+  login: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/auth/login',
+      data
+    ),
 
-
-  logout: <T = unknown>() => {
-
-    return api.post<T>(
-      '/auth/logout'
-    );
-
-  },
-
-
-  me: <T = unknown>() => {
-
-    return api.get<T>(
+  me: <T = unknown>() =>
+    get<T>(
       '/auth/me'
-    );
+    ),
 
-  }
+  logout: <T = unknown>() =>
+    post<T>(
+      '/auth/logout'
+    ),
+
+};
+
+
+// ============================================================================
+// USER API
+// ============================================================================
+
+export const userApi = {
+
+  me: <T = unknown>() =>
+    get<T>(
+      '/users/me'
+    ),
+
+  update: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    put<T>(
+      '/users/me',
+      data
+    ),
 
 };
 
@@ -661,60 +370,41 @@ export const authApi = {
 
 export const storeApi = {
 
-  list: <T = unknown>() => {
-
-    return api.get<T>(
+  list: <T = unknown>() =>
+    get<T>(
       '/stores'
-    );
-
-  },
-
+    ),
 
   get: <T = unknown>(
     storeId: string
-  ) => {
-
-    return api.get<T>(
+  ) =>
+    get<T>(
       `/stores/${storeId}`
-    );
-
-  },
-
+    ),
 
   create: <T = unknown>(
     data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
+  ) =>
+    post<T>(
       '/stores',
       data
-    );
-
-  },
-
+    ),
 
   update: <T = unknown>(
     storeId: string,
     data: Record<string, unknown>
-  ) => {
-
-    return api.patch<T>(
+  ) =>
+    put<T>(
       `/stores/${storeId}`,
       data
-    );
+    ),
 
-  },
-
-
-  delete: <T = unknown>(
+  remove: <T = unknown>(
     storeId: string
-  ) => {
-
-    return api.delete<T>(
+  ) =>
+    del<T>(
       `/stores/${storeId}`
-    );
-
-  }
+    ),
 
 };
 
@@ -727,39 +417,19 @@ export const brandingApi = {
 
   get: <T = unknown>(
     storeId: string
-  ) => {
-
-    return api.get<T>(
+  ) =>
+    get<T>(
       `/branding/${storeId}`
-    );
-
-  },
-
-
-  create: <T = unknown>(
-    storeId: string,
-    data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
-      `/branding/${storeId}`,
-      data
-    );
-
-  },
-
+    ),
 
   update: <T = unknown>(
     storeId: string,
     data: Record<string, unknown>
-  ) => {
-
-    return api.patch<T>(
+  ) =>
+    put<T>(
       `/branding/${storeId}`,
       data
-    );
-
-  }
+    ),
 
 };
 
@@ -771,78 +441,50 @@ export const brandingApi = {
 export const productApi = {
 
   list: <T = unknown>(
-    storeId: string
-  ) => {
-
-    return api.get<T>(
-      `/products/${storeId}`
-    );
-
-  },
-
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/products${buildQueryString(params)}`
+    ),
 
   get: <T = unknown>(
-    storeId: string,
     productId: string
-  ) => {
-
-    return api.get<T>(
-      `/products/${storeId}/${productId}`
-    );
-
-  },
-
+  ) =>
+    get<T>(
+      `/products/${productId}`
+    ),
 
   create: <T = unknown>(
-    storeId: string,
     data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
-      `/products/${storeId}`,
+  ) =>
+    post<T>(
+      '/products',
       data
-    );
-
-  },
-
-
-  generate: <T = unknown>(
-    storeId: string,
-    data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
-      `/products/${storeId}/generate`,
-      data
-    );
-
-  },
-
+    ),
 
   update: <T = unknown>(
-    storeId: string,
     productId: string,
     data: Record<string, unknown>
-  ) => {
-
-    return api.patch<T>(
-      `/products/${storeId}/${productId}`,
+  ) =>
+    put<T>(
+      `/products/${productId}`,
       data
-    );
+    ),
 
-  },
-
-
-  delete: <T = unknown>(
-    storeId: string,
+  remove: <T = unknown>(
     productId: string
-  ) => {
+  ) =>
+    del<T>(
+      `/products/${productId}`
+    ),
 
-    return api.delete<T>(
-      `/products/${storeId}/${productId}`
-    );
-
-  }
+  generate: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/products/generate',
+      data
+    ),
 
 };
 
@@ -855,65 +497,180 @@ export const themeApi = {
 
   list: <T = unknown>(
     storeId: string
-  ) => {
-
-    return api.get<T>(
-      `/themes/${storeId}`
-    );
-
-  },
-
+  ) =>
+    get<T>(
+      `/themes?storeId=${encodeURIComponent(
+        storeId
+      )}`
+    ),
 
   get: <T = unknown>(
-    storeId: string,
+    _storeId: string,
     themeId: string
-  ) => {
-
-    return api.get<T>(
-      `/themes/${storeId}/${themeId}`
-    );
-
-  },
-
+  ) =>
+    get<T>(
+      `/themes/${themeId}`
+    ),
 
   create: <T = unknown>(
     storeId: string,
     data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
-      `/themes/${storeId}`,
-      data
-    );
-
-  },
-
+  ) =>
+    post<T>(
+      '/themes',
+      {
+        ...data,
+        storeId,
+      }
+    ),
 
   update: <T = unknown>(
-    storeId: string,
+    _storeId: string,
     themeId: string,
     data: Record<string, unknown>
-  ) => {
-
-    return api.patch<T>(
-      `/themes/${storeId}/${themeId}`,
+  ) =>
+    put<T>(
+      `/themes/${themeId}`,
       data
+    ),
 
-    );
-
-  },
-
+  remove: <T = unknown>(
+    _storeId: string,
+    themeId: string
+  ) =>
+    del<T>(
+      `/themes/${themeId}`
+    ),
 
   deploy: <T = unknown>(
-    storeId: string,
+    _storeId: string,
     themeId: string
-  ) => {
+  ) =>
+    post<T>(
+      `/themes/${themeId}/deploy`
+    ),
 
-    return api.post<T>(
-      `/themes/${storeId}/${themeId}/deploy`
-    );
+};
 
-  }
+
+// ============================================================================
+// ANALYTICS API
+// ============================================================================
+
+export const analyticsApi = {
+
+  summary: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/analytics/summary${buildQueryString(
+        params
+      )}`
+    ),
+
+  daily: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/analytics/daily${buildQueryString(
+        params
+      )}`
+    ),
+
+  events: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/analytics/events/counts${buildQueryString(
+        params
+      )}`
+    ),
+
+  categories: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/analytics/categories${buildQueryString(
+        params
+      )}`
+    ),
+
+  recent: <T = unknown>(
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/analytics/recent${buildQueryString(
+        params
+      )}`
+    ),
+
+  store: <T = unknown>(
+    storeId: string,
+    params: Record<string, unknown> = {}
+  ) =>
+    get<T>(
+      `/analytics/store/${storeId}${buildQueryString(
+        params
+      )}`
+    ),
+
+  recordEvent: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/analytics/events',
+      data
+    ),
+
+  recordAIUsage: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/analytics/ai-usage',
+      data
+    ),
+
+};
+
+
+// ============================================================================
+// BILLING API
+// ============================================================================
+
+export const billingApi = {
+
+  get: <T = unknown>() =>
+    get<T>(
+      '/billing'
+    ),
+
+  subscription: <T = unknown>() =>
+    get<T>(
+      '/billing/subscription'
+    ),
+
+  createCheckout: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/billing/checkout',
+      data
+    ),
+
+  createPortal: <T = unknown>() =>
+    post<T>(
+      '/billing/portal'
+    ),
+
+  cancel: <T = unknown>() =>
+    post<T>(
+      '/billing/cancel'
+    ),
+
+  resume: <T = unknown>() =>
+    post<T>(
+      '/billing/resume'
+    ),
 
 };
 
@@ -926,170 +683,26 @@ export const shopifyApi = {
 
   install: <T = unknown>(
     data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
+  ) =>
+    post<T>(
       '/shopify/install',
       data
-    );
-
-  },
-
-
-  stores: <T = unknown>() => {
-
-    return api.get<T>(
-      '/shopify/stores'
-    );
-
-  },
-
+    ),
 
   status: <T = unknown>(
     storeId: string
-  ) => {
-
-    return api.get<T>(
+  ) =>
+    get<T>(
       `/shopify/status/${storeId}`
-    );
+    ),
 
-  }
-
-};
-
-
-// ============================================================================
-// BILLING API
-// ============================================================================
-
-export const billingApi = {
-
-  plans: <T = unknown>() => {
-
-    return api.get<T>(
-      '/billing/plans'
-    );
-
-  },
-
-
-  subscription: <T = unknown>() => {
-
-    return api.get<T>(
-      '/billing/subscription'
-    );
-
-  },
-
-
-  checkout: <T = unknown>(
+  connect: <T = unknown>(
     data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
-      '/billing/checkout',
+  ) =>
+    post<T>(
+      '/shopify/connect',
       data
-    );
-
-  },
-
-
-  cancel: <T = unknown>() => {
-
-    return api.post<T>(
-      '/billing/cancel'
-    );
-
-  }
-
-};
-
-
-// ============================================================================
-// ANALYTICS API
-// ============================================================================
-
-export const analyticsApi = {
-
-  dashboard: <T = unknown>(
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/dashboard${buildQueryString(params)}`
-    );
-
-  },
-
-
-  store: <T = unknown>(
-    storeId: string,
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/stores/${storeId}${buildQueryString(params)}`
-    );
-
-  },
-
-
-  products: <T = unknown>(
-    storeId: string,
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/products/${storeId}${buildQueryString(params)}`
-    );
-
-  },
-
-
-  themes: <T = unknown>(
-    storeId: string,
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/themes/${storeId}${buildQueryString(params)}`
-    );
-
-  },
-
-
-  deployments: <T = unknown>(
-    storeId: string,
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/deployments/${storeId}${buildQueryString(params)}`
-    );
-
-  },
-
-
-  revenue: <T = unknown>(
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/revenue${buildQueryString(params)}`
-    );
-
-  },
-
-
-  usage: <T = unknown>(
-    params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/analytics/usage${buildQueryString(params)}`
-    );
-
-  }
+    ),
 
 };
 
@@ -1100,184 +713,138 @@ export const analyticsApi = {
 
 export const adminApi = {
 
-  stats: <T = unknown>() => {
+  dashboard: <T = unknown>() =>
+    get<T>(
+      '/admin/dashboard'
+    ),
 
-    return api.get<T>(
-      '/admin/stats'
-    );
-
-  },
-
+  overview: <T = unknown>() =>
+    get<T>(
+      '/admin/overview'
+    ),
 
   users: <T = unknown>(
     params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/admin/users${buildQueryString(params)}`
-    );
-
-  },
-
+  ) =>
+    get<T>(
+      `/admin/users${buildQueryString(
+        params
+      )}`
+    ),
 
   user: <T = unknown>(
     userId: string
-  ) => {
-
-    return api.get<T>(
+  ) =>
+    get<T>(
       `/admin/users/${userId}`
-    );
+    ),
 
-  },
+  userCounts: <T = unknown>() =>
+    get<T>(
+      '/admin/users/counts'
+    ),
 
-
-  updateUser: <T = unknown>(
+  updateUserStatus: <T = unknown>(
     userId: string,
-    data: Record<string, unknown>
-  ) => {
+    status: string
+  ) =>
+    patch<T>(
+      `/admin/users/${userId}/status`,
+      { status }
+    ),
 
-    return api.patch<T>(
-      `/admin/users/${userId}`,
-      data
-    );
+  activateUser: <T = unknown>(
+    userId: string
+  ) =>
+    patch<T>(
+      `/admin/users/${userId}/activate`
+    ),
 
-  },
+  suspendUser: <T = unknown>(
+    userId: string
+  ) =>
+    patch<T>(
+      `/admin/users/${userId}/suspend`
+    ),
 
+  deleteUser: <T = unknown>(
+    userId: string
+  ) =>
+    del<T>(
+      `/admin/users/${userId}`
+    ),
 
   stores: <T = unknown>(
     params: Record<string, unknown> = {}
-  ) => {
-
-    return api.get<T>(
-      `/admin/stores${buildQueryString(params)}`
-    );
-
-  },
-
+  ) =>
+    get<T>(
+      `/admin/stores${buildQueryString(
+        params
+      )}`
+    ),
 
   store: <T = unknown>(
     storeId: string
-  ) => {
-
-    return api.get<T>(
+  ) =>
+    get<T>(
       `/admin/stores/${storeId}`
-    );
+    ),
 
-  },
+  storeCounts: <T = unknown>() =>
+    get<T>(
+      '/admin/stores/counts'
+    ),
 
-
-  updateStore: <T = unknown>(
+  updateStoreStatus: <T = unknown>(
     storeId: string,
-    data: Record<string, unknown>
-  ) => {
+    status: string
+  ) =>
+    patch<T>(
+      `/admin/stores/${storeId}/status`,
+      { status }
+    ),
 
-    return api.patch<T>(
-      `/admin/stores/${storeId}`,
-      data
-    );
-
-  },
-
-
-  subscriptions: <T = unknown>(
+  billing: <T = unknown>(
     params: Record<string, unknown> = {}
-  ) => {
+  ) =>
+    get<T>(
+      `/admin/billing${buildQueryString(
+        params
+      )}`
+    ),
 
-    return api.get<T>(
-      `/admin/subscriptions${buildQueryString(params)}`
-    );
+  billingSummary: <T = unknown>() =>
+    get<T>(
+      '/admin/billing/summary'
+    ),
 
-  },
+  recentUsers: <T = unknown>(
+    limit = 10
+  ) =>
+    get<T>(
+      `/admin/recent/users?limit=${limit}`
+    ),
 
-
-  updateSubscription: <T = unknown>(
-    subscriptionId: string,
-    data: Record<string, unknown>
-  ) => {
-
-    return api.patch<T>(
-      `/admin/subscriptions/${subscriptionId}`,
-      data
-    );
-
-  },
-
-
-  health: <T = unknown>() => {
-
-    return api.get<T>(
-      '/admin/health'
-    );
-
-  }
+  recentStores: <T = unknown>(
+    limit = 10
+  ) =>
+    get<T>(
+      `/admin/recent/stores?limit=${limit}`
+    ),
 
 };
 
 
 // ============================================================================
-// DEPLOYMENT API
+// HEALTH
 // ============================================================================
 
-export const deploymentApi = {
+export const healthApi = {
 
-  list: <T = unknown>(
-    storeId: string
-  ) => {
-
-    return api.get<T>(
-      `/deployments/${storeId}`
-    );
-
-  },
-
-
-  get: <T = unknown>(
-    storeId: string,
-    deploymentId: string
-  ) => {
-
-    return api.get<T>(
-      `/deployments/${storeId}/${deploymentId}`
-    );
-
-  },
-
-
-  create: <T = unknown>(
-    storeId: string,
-    data: Record<string, unknown>
-  ) => {
-
-    return api.post<T>(
-      `/deployments/${storeId}`,
-      data
-    );
-
-  },
-
-
-  status: <T = unknown>(
-    storeId: string,
-    deploymentId: string
-  ) => {
-
-    return api.get<T>(
-      `/deployments/${storeId}/${deploymentId}/status`
-    );
-
-  },
-
-
-  cancel: <T = unknown>(
-    storeId: string,
-    deploymentId: string
-  ) => {
-
-    return api.post<T>(
-      `/deployments/${storeId}/${deploymentId}/cancel`
-    );
-
-  }
+  check: <T = unknown>() =>
+    get<T>(
+      '/health'
+    ),
 
 };
 
