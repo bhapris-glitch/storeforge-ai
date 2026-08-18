@@ -391,33 +391,27 @@ export default function GenerateProductPage() {
               >
 
                 <Select
-
-                  label="Category"
-
-                  options={categoryOptions}
-
-                  value={category}
-
-                  onChange={
-                    setCategory
-                  }
-
-                />
+  label="Category"
+  options={categoryOptions}
+  value={category}
+  onChange={(event) =>
+    setCategory(
+      event.target.value
+    )
+  }
+/>
 
 
                 <Select
-
-                  label="Content Tone"
-
-                  options={toneOptions}
-
-                  value={tone}
-
-                  onChange={
-                    setTone
-                  }
-
-                />
+  label="Content Tone"
+  options={toneOptions}
+  value={tone}
+  onChange={(event) =>
+    setTone(
+      event.target.value
+    )
+  }
+/>
 
               </div>
 
