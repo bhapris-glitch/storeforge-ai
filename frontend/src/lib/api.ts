@@ -639,9 +639,9 @@ export const analyticsApi = {
 
 export const billingApi = {
 
-  get: <T = unknown>() =>
+  plans: <T = unknown>() =>
     get<T>(
-      '/billing'
+      '/billing/plans'
     ),
 
   subscription: <T = unknown>() =>
@@ -649,17 +649,12 @@ export const billingApi = {
       '/billing/subscription'
     ),
 
-  createCheckout: <T = unknown>(
+  checkout: <T = unknown>(
     data: Record<string, unknown>
   ) =>
     post<T>(
       '/billing/checkout',
       data
-    ),
-
-  createPortal: <T = unknown>() =>
-    post<T>(
-      '/billing/portal'
     ),
 
   cancel: <T = unknown>() =>
@@ -672,35 +667,24 @@ export const billingApi = {
       '/billing/resume'
     ),
 
-};
-
-
-// ============================================================================
-// SHOPIFY API
-// ============================================================================
-
-export const shopifyApi = {
-
-  install: <T = unknown>(
+  changePlan: <T = unknown>(
     data: Record<string, unknown>
   ) =>
     post<T>(
-      '/shopify/install',
+      '/billing/change-plan',
       data
     ),
 
-  status: <T = unknown>(
-    storeId: string
-  ) =>
+  limits: <T = unknown>() =>
     get<T>(
-      `/shopify/status/${storeId}`
+      '/billing/limits'
     ),
 
-  connect: <T = unknown>(
+  feature: <T = unknown>(
     data: Record<string, unknown>
   ) =>
     post<T>(
-      '/shopify/connect',
+      '/billing/feature',
       data
     ),
 
@@ -749,24 +733,58 @@ export const adminApi = {
     status: string
   ) =>
     patch<T>(
-      `/admin/users/${userId}/status`,
-      { status }
+export const billingApi = {
+
+  plans: <T = unknown>() =>
+    get<T>(
+      '/billing/plans'
     ),
 
-  activateUser: <T = unknown>(
-    userId: string
+  subscription: <T = unknown>() =>
+    get<T>(
+      '/billing/subscription'
+    ),
+
+  checkout: <T = unknown>(
+    data: Record<string, unknown>
   ) =>
-    patch<T>(
-      `/admin/users/${userId}/activate`
+    post<T>(
+      '/billing/checkout',
+      data
     ),
 
-  suspendUser: <T = unknown>(
-    userId: string
+  cancel: <T = unknown>() =>
+    post<T>(
+      '/billing/cancel'
+    ),
+
+  resume: <T = unknown>() =>
+    post<T>(
+      '/billing/resume'
+    ),
+
+  changePlan: <T = unknown>(
+    data: Record<string, unknown>
   ) =>
-    patch<T>(
-      `/admin/users/${userId}/suspend`
+    post<T>(
+      '/billing/change-plan',
+      data
     ),
 
+  limits: <T = unknown>() =>
+    get<T>(
+      '/billing/limits'
+    ),
+
+  feature: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/billing/feature',
+      data
+    ),
+
+}; 
   deleteUser: <T = unknown>(
     userId: string
   ) =>
