@@ -358,14 +358,14 @@ onChange={(event) =>
             >
 
               <Switch
+  checked={notifications}
 
-                checked={notifications}
-
-                onChange={
-                  setNotifications
-                }
-
-              />
+  onChange={(event) =>
+    setNotifications(
+      event.target.checked
+    )
+  }
+/>
 
             </SettingRow>
 
