@@ -30,7 +30,6 @@ import {
   type ReactNode,
 } from 'react';
 
-
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -42,9 +41,11 @@ export type AlertVariant =
   | 'info'
   | 'primary';
 
-
 export interface AlertProps
-  extends HTMLAttributes<HTMLDivElement> {
+  extends Omit<
+    HTMLAttributes<HTMLDivElement>,
+    'title'
+  > {
 
   /**
    * Alert visual variant.
@@ -53,6 +54,9 @@ export interface AlertProps
 
   /**
    * Optional alert title.
+   *
+   * This intentionally uses ReactNode instead of the native
+   * HTML title attribute.
    */
   title?: ReactNode;
 
@@ -75,9 +79,7 @@ export interface AlertProps
    * Alert content.
    */
   children: ReactNode;
-
 }
-
 
 // ============================================================================
 // VARIANT STYLES
@@ -92,7 +94,6 @@ const variantStyles: Record<
     text: string;
   }
 > = {
-
   success: {
     container: [
       'border-emerald-500/20',
@@ -105,7 +106,6 @@ const variantStyles: Record<
 
     text: 'text-emerald-100/70',
   },
-
 
   warning: {
     container: [
@@ -120,7 +120,6 @@ const variantStyles: Record<
     text: 'text-yellow-100/70',
   },
 
-
   danger: {
     container: [
       'border-red-500/20',
@@ -133,7 +132,6 @@ const variantStyles: Record<
 
     text: 'text-red-100/70',
   },
-
 
   info: {
     container: [
@@ -148,7 +146,6 @@ const variantStyles: Record<
     text: 'text-blue-100/70',
   },
 
-
   primary: {
     container: [
       'border-[#FF3B2F]/20',
@@ -161,18 +158,14 @@ const variantStyles: Record<
 
     text: 'text-white/60',
   },
-
 };
-
 
 // ============================================================================
 // DEFAULT ICONS
 // ============================================================================
 
 function SuccessIcon() {
-
   return (
-
     <svg
       width="20"
       height="20"
@@ -186,16 +179,11 @@ function SuccessIcon() {
     >
       <path d="M20 6 9 17l-5-5" />
     </svg>
-
   );
-
 }
 
-
 function WarningIcon() {
-
   return (
-
     <svg
       width="20"
       height="20"
@@ -211,16 +199,11 @@ function WarningIcon() {
       <path d="M12 9v4" />
       <path d="M12 17h.01" />
     </svg>
-
   );
-
 }
 
-
 function DangerIcon() {
-
   return (
-
     <svg
       width="20"
       height="20"
@@ -242,16 +225,11 @@ function DangerIcon() {
 
       <path d="M12 16h.01" />
     </svg>
-
   );
-
 }
 
-
 function InfoIcon() {
-
   return (
-
     <svg
       width="20"
       height="20"
@@ -273,16 +251,11 @@ function InfoIcon() {
 
       <path d="M12 8h.01" />
     </svg>
-
   );
-
 }
 
-
 function PrimaryIcon() {
-
   return (
-
     <svg
       width="20"
       height="20"
@@ -297,16 +270,11 @@ function PrimaryIcon() {
       <path d="M12 3v18" />
       <path d="M3 12h18" />
     </svg>
-
   );
-
 }
 
-
 function CloseIcon() {
-
   return (
-
     <svg
       width="18"
       height="18"
@@ -321,11 +289,8 @@ function CloseIcon() {
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
     </svg>
-
   );
-
 }
-
 
 // ============================================================================
 // DEFAULT ICON
@@ -334,9 +299,7 @@ function CloseIcon() {
 function getDefaultIcon(
   variant: AlertVariant
 ): ReactNode {
-
   switch (variant) {
-
     case 'success':
       return <SuccessIcon />;
 
@@ -354,11 +317,8 @@ function getDefaultIcon(
 
     default:
       return <InfoIcon />;
-
   }
-
 }
-
 
 // ============================================================================
 // ALERT
@@ -385,27 +345,20 @@ const Alert = forwardRef<
       className = '',
 
       ...props
-
     },
     ref
   ) => {
-
     const styles =
       variantStyles[variant];
 
-
     return (
-
       <div
-
         ref={ref}
-
         role={
           variant === 'danger'
             ? 'alert'
             : 'status'
         }
-
         className={[
           'flex',
           'w-full',
@@ -417,12 +370,11 @@ const Alert = forwardRef<
           'shadow-sm',
           styles.container,
           className,
-        ].join(' ')}
-
+        ]
+          .filter(Boolean)
+          .join(' ')}
         {...props}
-
       >
-
         {/* ================================================================ */}
         {/* ICON */}
         {/* ================================================================ */}
@@ -434,22 +386,15 @@ const Alert = forwardRef<
             styles.icon,
           ].join(' ')}
         >
-
           {icon || getDefaultIcon(variant)}
-
         </div>
-
 
         {/* ================================================================ */}
         {/* CONTENT */}
         {/* ================================================================ */}
 
-        <div
-          className="min-w-0 flex-1"
-        >
-
+        <div className="min-w-0 flex-1">
           {title && (
-
             <div
               className={[
                 'text-sm',
@@ -457,44 +402,32 @@ const Alert = forwardRef<
                 styles.title,
               ].join(' ')}
             >
-
               {title}
-
             </div>
-
           )}
-
 
           <div
             className={[
-              title
-                ? 'mt-1'
-                : '',
+              title ? 'mt-1' : '',
               'text-sm',
               'leading-5',
               styles.text,
-            ].filter(Boolean).join(' ')}
+            ]
+              .filter(Boolean)
+              .join(' ')}
           >
-
             {children}
-
           </div>
-
         </div>
-
 
         {/* ================================================================ */}
         {/* DISMISS */}
         {/* ================================================================ */}
 
         {dismissible && (
-
           <button
-
             type="button"
-
             onClick={onDismiss}
-
             className={[
               'mt-0.5',
               'shrink-0',
@@ -507,31 +440,21 @@ const Alert = forwardRef<
               'focus-visible:ring-2',
               'focus-visible:ring-[#FF3B2F]',
             ].join(' ')}
-
             aria-label="Dismiss alert"
-
           >
-
             <CloseIcon />
-
           </button>
-
         )}
-
       </div>
-
     );
-
   }
 );
-
 
 // ============================================================================
 // DISPLAY NAME
 // ============================================================================
 
 Alert.displayName = 'Alert';
-
 
 // ============================================================================
 // EXPORT
