@@ -457,25 +457,25 @@ export default function BrandingForm({
 
         <Select
 
-          label="Industry"
+  label="Industry"
 
-          options={
-            industryOptions
-          }
+  options={
+    industryOptions
+  }
 
-          value={
-            formData.industry
-          }
+  value={
+    formData.industry
+  }
 
-          onChange={
-            (value) =>
-              updateField(
-                'industry',
-                value
-              )
-          }
+  onChange={
+    (event) =>
+      updateField(
+        'industry',
+        event.target.value
+      )
+  }
 
-        />
+/>
 
 
 
