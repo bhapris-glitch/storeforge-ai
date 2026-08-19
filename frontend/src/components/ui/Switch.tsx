@@ -24,6 +24,7 @@
 
 import {
   forwardRef,
+  useId,
   type ReactNode,
   type InputHTMLAttributes,
 } from 'react';
@@ -42,7 +43,7 @@ export type SwitchSize =
 export interface SwitchProps
   extends Omit<
     InputHTMLAttributes<HTMLInputElement>,
-    'type'
+    'type' | 'size'
   > {
 
   /**
@@ -180,9 +181,10 @@ const Switch = forwardRef<
 
   ) => {
 
+    const generatedId = useId();
 
     const switchId =
-      id || 'switch';
+      id || `switch-${generatedId}`;
 
 
     const styles =
@@ -207,17 +209,18 @@ const Switch = forwardRef<
             'flex',
             'items-center',
             'gap-3',
-            'cursor-pointer',
 
             disabled
               ? 'cursor-not-allowed opacity-60'
-              : '',
+              : 'cursor-pointer',
 
             labelPosition === 'left'
               ? 'flex-row-reverse justify-between'
               : '',
 
-          ].join(' ')}
+          ]
+            .filter(Boolean)
+            .join(' ')}
         >
 
 
@@ -264,6 +267,7 @@ const Switch = forwardRef<
 
 
             <input
+              {...props}
               ref={ref}
               id={switchId}
               type="checkbox"
@@ -277,12 +281,19 @@ const Switch = forwardRef<
                 'w-full',
                 'cursor-pointer',
                 'opacity-0',
-              ].join(' ')}
-              {...props}
+
+                disabled
+                  ? 'cursor-not-allowed'
+                  : '',
+
+              ]
+                .filter(Boolean)
+                .join(' ')}
             />
 
 
             <span
+              aria-hidden="true"
               className={[
                 'absolute',
                 'rounded-full',
