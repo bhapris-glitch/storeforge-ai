@@ -33,7 +33,7 @@ import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
 import Dropdown from '@/components/ui/Dropdown';
 
-
+import { DropdownItem } from '@/components/ui/Dropdown';
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -175,14 +175,8 @@ function ChevronIcon() {
 //    value: 'logout',
 //  },
 
-//];
+// ];
 
-const userMenuItems: DropdownItem[] = [
-  { id: 'profile', label: 'Profile', value: 'profile' },
-  { id: 'settings', label: 'Account Settings', value: 'settings' },
-  { id: 'billing', label: 'Billing', value: 'billing' },
-  { id: 'logout', label: 'Logout', value: 'logout' },
-];
 
 
 // ============================================================================
