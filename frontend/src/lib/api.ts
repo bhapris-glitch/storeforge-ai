@@ -733,58 +733,10 @@ export const adminApi = {
     status: string
   ) =>
     patch<T>(
-export const billingApi = {
-
-  plans: <T = unknown>() =>
-    get<T>(
-      '/billing/plans'
+      `/admin/users/${userId}/status`,
+      { status }
     ),
 
-  subscription: <T = unknown>() =>
-    get<T>(
-      '/billing/subscription'
-    ),
-
-  checkout: <T = unknown>(
-    data: Record<string, unknown>
-  ) =>
-    post<T>(
-      '/billing/checkout',
-      data
-    ),
-
-  cancel: <T = unknown>() =>
-    post<T>(
-      '/billing/cancel'
-    ),
-
-  resume: <T = unknown>() =>
-    post<T>(
-      '/billing/resume'
-    ),
-
-  changePlan: <T = unknown>(
-    data: Record<string, unknown>
-  ) =>
-    post<T>(
-      '/billing/change-plan',
-      data
-    ),
-
-  limits: <T = unknown>() =>
-    get<T>(
-      '/billing/limits'
-    ),
-
-  feature: <T = unknown>(
-    data: Record<string, unknown>
-  ) =>
-    post<T>(
-      '/billing/feature',
-      data
-    ),
-
-}; 
   deleteUser: <T = unknown>(
     userId: string
   ) =>
