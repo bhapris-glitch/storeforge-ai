@@ -153,30 +153,39 @@ function ChevronIcon() {
 // USER MENU ITEMS
 // ============================================================================
 
- const userMenuItems: DropdownItem[] = [
+const userMenuItems: DropdownItem[] = [
 
   {
     id: 'profile',
     label: 'Profile',
-    value: 'profile',
+    onClick: () => {
+      console.log('Profile clicked');
+    },
   },
 
   {
     id: 'settings',
     label: 'Account Settings',
-    value: 'settings',
+    onClick: () => {
+      console.log('Settings clicked');
+    },
   },
 
   {
     id: 'billing',
     label: 'Billing',
-    value: 'billing',
+    onClick: () => {
+      console.log('Billing clicked');
+    },
   },
 
   {
     id: 'logout',
     label: 'Logout',
-    value: 'logout',
+    danger: true,
+    onClick: () => {
+      console.log('Logout clicked');
+    },
   },
 
 ];
