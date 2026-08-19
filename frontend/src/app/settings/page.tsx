@@ -337,9 +337,11 @@ export default function SettingsPage() {
 
                 checked={aiEnabled}
 
-                onChange={
-                  setAiEnabled
-                }
+onChange={(event) =>
+  setAiEnabled(
+    event.target.checked
+  )
+}
 
               />
 
