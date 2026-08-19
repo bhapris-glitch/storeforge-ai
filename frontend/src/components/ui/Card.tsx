@@ -51,43 +51,54 @@ export type CardPadding =
   | 'lg';
 
 
+// FIXED: removed native HTML title collision
 export interface CardProps
-  extends HTMLAttributes<HTMLDivElement> {
+  extends Omit<
+    HTMLAttributes<HTMLDivElement>,
+    'title'
+  > {
 
   /**
    * Card visual style.
    */
   variant?: CardVariant;
 
+
   /**
    * Card internal spacing.
    */
   padding?: CardPadding;
+
 
   /**
    * Makes the card interactive.
    */
   clickable?: boolean;
 
+
   /**
    * Optional card title.
    */
   title?: ReactNode;
+
 
   /**
    * Optional description.
    */
   description?: ReactNode;
 
+
   /**
    * Optional header action.
    */
   action?: ReactNode;
 
+
   /**
    * Optional footer.
    */
   footer?: ReactNode;
+
 
   /**
    * Card content.
@@ -209,6 +220,7 @@ const Card = forwardRef<
 
   ) => {
 
+
     const hasHeader =
       Boolean(
         title ||
@@ -224,10 +236,15 @@ const Card = forwardRef<
         ref={ref}
 
         className={[
+
           'overflow-hidden',
+
           'rounded-2xl',
+
           'shadow-sm',
+
           'transition-all',
+
           'duration-200',
 
           variantStyles[variant],
@@ -251,39 +268,57 @@ const Card = forwardRef<
 
       >
 
-        {/* ================================================================ */}
+
         {/* HEADER */}
-        {/* ================================================================ */}
 
         {hasHeader && (
 
           <div
+
             className={[
+
               'flex',
+
               'items-start',
+
               'justify-between',
+
               'gap-4',
+
               'border-b',
+
               'border-white/10',
+
               padding === 'none'
                 ? 'px-5 py-4'
                 : paddingStyles[padding],
+
             ].join(' ')}
+
           >
 
+
             <div className="min-w-0">
+
 
               {title && (
 
                 <h3
+
                   className={[
+
                     'text-base',
+
                     'font-semibold',
+
                     'tracking-tight',
+
                     variant === 'outline'
                       ? 'text-[#0B1710]'
                       : 'text-white',
+
                   ].join(' ')}
+
                 >
 
                   {title}
@@ -293,17 +328,25 @@ const Card = forwardRef<
               )}
 
 
+
               {description && (
 
                 <p
+
                   className={[
+
                     'mt-1',
+
                     'text-sm',
+
                     'leading-5',
+
                     variant === 'outline'
                       ? 'text-[#0B1710]/55'
                       : 'text-white/55',
+
                   ].join(' ')}
+
                 >
 
                   {description}
@@ -312,7 +355,9 @@ const Card = forwardRef<
 
               )}
 
+
             </div>
+
 
 
             {action && (
@@ -325,21 +370,19 @@ const Card = forwardRef<
 
             )}
 
+
           </div>
 
         )}
 
 
-        {/* ================================================================ */}
+
         {/* CONTENT */}
-        {/* ================================================================ */}
 
         <div
-          className={
-            hasHeader
-              ? paddingStyles[padding]
-              : paddingStyles[padding]
-          }
+
+          className={paddingStyles[padding]}
+
         >
 
           {children}
@@ -347,20 +390,25 @@ const Card = forwardRef<
         </div>
 
 
-        {/* ================================================================ */}
+
         {/* FOOTER */}
-        {/* ================================================================ */}
 
         {footer && (
 
           <div
+
             className={[
+
               'border-t',
+
               'border-white/10',
+
               padding === 'none'
                 ? 'px-5 py-4'
                 : paddingStyles[padding],
+
             ].join(' ')}
+
           >
 
             {footer}
@@ -369,17 +417,15 @@ const Card = forwardRef<
 
         )}
 
+
       </div>
 
     );
 
   }
+
 );
 
-
-// ============================================================================
-// DISPLAY NAME
-// ============================================================================
 
 Card.displayName = 'Card';
 
@@ -429,8 +475,7 @@ export const CardHeader = forwardRef<
 );
 
 
-CardHeader.displayName =
-  'CardHeader';
+CardHeader.displayName = 'CardHeader';
 
 
 // ============================================================================
@@ -459,15 +504,25 @@ export const CardTitle = forwardRef<
   ) => (
 
     <h3
+
       ref={ref}
+
       className={[
+
         'text-base',
+
         'font-semibold',
+
         'tracking-tight',
+
         'text-white',
+
         className,
+
       ].join(' ')}
+
       {...props}
+
     >
 
       {children}
@@ -478,8 +533,7 @@ export const CardTitle = forwardRef<
 );
 
 
-CardTitle.displayName =
-  'CardTitle';
+CardTitle.displayName = 'CardTitle';
 
 
 // ============================================================================
@@ -508,15 +562,25 @@ export const CardDescription = forwardRef<
   ) => (
 
     <p
+
       ref={ref}
+
       className={[
+
         'mt-1',
+
         'text-sm',
+
         'leading-5',
+
         'text-white/55',
+
         className,
+
       ].join(' ')}
+
       {...props}
+
     >
 
       {children}
@@ -527,8 +591,7 @@ export const CardDescription = forwardRef<
 );
 
 
-CardDescription.displayName =
-  'CardDescription';
+CardDescription.displayName = 'CardDescription';
 
 
 // ============================================================================
@@ -557,13 +620,21 @@ export const CardContent = forwardRef<
   ) => (
 
     <div
+
       ref={ref}
+
       className={[
+
         'px-5',
+
         'py-5',
+
         className,
+
       ].join(' ')}
+
       {...props}
+
     >
 
       {children}
@@ -574,8 +645,7 @@ export const CardContent = forwardRef<
 );
 
 
-CardContent.displayName =
-  'CardContent';
+CardContent.displayName = 'CardContent';
 
 
 // ============================================================================
@@ -604,19 +674,33 @@ export const CardFooter = forwardRef<
   ) => (
 
     <div
+
       ref={ref}
+
       className={[
+
         'flex',
+
         'items-center',
+
         'justify-between',
+
         'gap-3',
+
         'border-t',
+
         'border-white/10',
+
         'px-5',
+
         'py-4',
+
         className,
+
       ].join(' ')}
+
       {...props}
+
     >
 
       {children}
@@ -627,8 +711,7 @@ export const CardFooter = forwardRef<
 );
 
 
-CardFooter.displayName =
-  'CardFooter';
+CardFooter.displayName = 'CardFooter';
 
 
 // ============================================================================
