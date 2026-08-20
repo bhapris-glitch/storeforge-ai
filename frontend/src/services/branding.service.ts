@@ -221,7 +221,9 @@ export async function createBranding(
 
 
   const response =
-    await brandingApi.create<BrandResponse>(
+    await (brandingApi as typeof brandingApi & {
+      create: <T = unknown>(storeId: string, data: Record<string, unknown>) => Promise<T>;
+    }).create<BrandResponse>(
       storeId,
       data as Record<string, unknown>
     );
