@@ -367,9 +367,7 @@ export async function cancelSubscription(
   data: CancelSubscriptionData = {}
 ): Promise<void> {
 
-  await billingApi.cancel(
-    data
-  );
+  await billingApi.cancel();
 
 }
 
