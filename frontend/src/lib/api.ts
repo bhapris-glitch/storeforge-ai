@@ -770,6 +770,11 @@ export const billingApi = {
 // ============================================================================
 
 export const aiApi = {
+// ============================================================================
+// AI API
+// ============================================================================
+
+export const aiApi = {
 
   chat: <T = unknown>(
     data: Record<string, unknown>
@@ -779,6 +784,7 @@ export const aiApi = {
       data
     ),
 
+
   generateProduct: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -786,6 +792,7 @@ export const aiApi = {
       '/ai/products/generate',
       data
     ),
+
 
   generateTheme: <T = unknown>(
     data: Record<string, unknown>
@@ -795,6 +802,7 @@ export const aiApi = {
       data
     ),
 
+
   generateContent: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -802,6 +810,7 @@ export const aiApi = {
       '/ai/generate',
       data
     ),
+
 
   analyze: <T = unknown>(
     data: Record<string, unknown>
@@ -811,11 +820,21 @@ export const aiApi = {
       data
     ),
 
+
   brand: <T = unknown>(
     data: Record<string, unknown>
   ) =>
     post<T>(
       '/ai/brand',
+      data
+    ),
+
+
+  product: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/ai/product',
       data
     ),
 
