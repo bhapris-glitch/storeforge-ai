@@ -808,6 +808,26 @@ export const aiApi = {
 
 };
 
+analyze: async <T = unknown>(data: Record<string, unknown>) => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/ai/analyze`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("AI analysis failed");
+    }
+
+    return response.json() as Promise<T>;
+  },
+};
+
 // ============================================================================
 // ADMIN API
 // ============================================================================
