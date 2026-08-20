@@ -765,6 +765,48 @@ export const billingApi = {
 
 };
 
+// ============================================================================
+// AI API
+// ============================================================================
+
+export const aiApi = {
+
+  chat: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/ai/chat',
+      data
+    ),
+
+
+  generateProduct: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/ai/products/generate',
+      data
+    ),
+
+
+  generateTheme: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/ai/themes/generate',
+      data
+    ),
+
+
+  generateContent: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/ai/generate',
+      data
+    ),
+
+};
 
 // ============================================================================
 // ADMIN API
