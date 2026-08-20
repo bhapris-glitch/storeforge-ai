@@ -259,9 +259,9 @@ export async function generateProduct(
 
 
   const response =
-    await aiApi.product<AIGenerationResponse<ProductSuggestion>>(
-      data as Record<string, unknown>
-    );
+  await aiApi.product<AIGenerationResponse<ProductSuggestion>>(
+    data as unknown as Record<string, unknown>
+  );
 
 
   return (
