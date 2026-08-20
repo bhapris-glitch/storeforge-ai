@@ -320,8 +320,8 @@ export async function createCheckout(
 
 
   return billingApi.checkout<CheckoutResponse>(
-    data as Record<string, unknown>
-  );
+  data as unknown as Record<string, unknown>
+);
 
 }
 
