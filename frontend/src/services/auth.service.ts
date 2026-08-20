@@ -90,9 +90,9 @@ export async function login(
 ): Promise<AuthResponse> {
 
   const response =
-    await authApi.login<AuthResponse>(
-      data
-    );
+  await authApi.login<AuthResponse>(
+    data as unknown as Record<string, unknown>
+  );
 
 
   return response;
