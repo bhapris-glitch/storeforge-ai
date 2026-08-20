@@ -110,7 +110,7 @@ export async function register(
 
   const response =
     await authApi.register<AuthResponse>(
-      data
+      data as unknown as Record<string, unknown>
     );
 
 
