@@ -26,10 +26,15 @@ const API_URL =
 // ============================================================================
 
 export interface ApiErrorResponse {
+
   success?: boolean;
+
   message?: string;
+
   error?: string;
+
   errors?: unknown;
+
 }
 
 
@@ -39,11 +44,13 @@ export class ApiError extends Error {
 
   data?: ApiErrorResponse;
 
+
   constructor(
     message: string,
     status = 500,
     data?: ApiErrorResponse
   ) {
+
     super(message);
 
     this.name = 'ApiError';
@@ -51,7 +58,9 @@ export class ApiError extends Error {
     this.status = status;
 
     this.data = data;
+
   }
+
 }
 
 
@@ -66,6 +75,7 @@ export function buildQueryString(
   const searchParams =
     new URLSearchParams();
 
+
   Object.entries(params).forEach(
     ([key, value]) => {
 
@@ -77,34 +87,44 @@ export function buildQueryString(
         return;
       }
 
+
       if (
         Array.isArray(value)
       ) {
+
         value.forEach(
           (item) => {
+
             searchParams.append(
               key,
               String(item)
             );
+
           }
         );
 
         return;
+
       }
+
 
       searchParams.set(
         key,
         String(value)
       );
+
     }
   );
+
 
   const query =
     searchParams.toString();
 
+
   return query
     ? `?${query}`
     : '';
+
 }
 
 
@@ -125,6 +145,7 @@ const api: AxiosInstance =
     withCredentials: true,
 
     timeout: 30000,
+
   });
 
 
@@ -148,6 +169,7 @@ api.interceptors.request.use(
           'token'
         );
 
+
       if (token) {
 
         config.headers =
@@ -155,10 +177,14 @@ api.interceptors.request.use(
 
         config.headers.Authorization =
           `Bearer ${token}`;
+
       }
+
     }
 
+
     return config;
+
   }
 );
 
@@ -168,8 +194,10 @@ api.interceptors.request.use(
 // ============================================================================
 
 api.interceptors.response.use(
+
   (response) =>
     response,
+
 
   (error: AxiosError<ApiErrorResponse>) => {
 
@@ -177,14 +205,17 @@ api.interceptors.response.use(
       error.response?.status ||
       500;
 
+
     const data =
       error.response?.data;
+
 
     const message =
       data?.message ||
       data?.error ||
       error.message ||
       'Request failed.';
+
 
     if (
       status === 401 &&
@@ -199,7 +230,9 @@ api.interceptors.response.use(
       localStorage.removeItem(
         'token'
       );
+
     }
+
 
     return Promise.reject(
       new ApiError(
@@ -208,7 +241,9 @@ api.interceptors.response.use(
         data
       )
     );
+
   }
+
 );
 
 
@@ -230,6 +265,7 @@ export async function get<
     );
 
   return response.data;
+
 }
 
 
@@ -249,6 +285,7 @@ export async function post<
     );
 
   return response.data;
+
 }
 
 
@@ -268,6 +305,7 @@ export async function put<
     );
 
   return response.data;
+
 }
 
 
@@ -287,6 +325,7 @@ export async function patch<
     );
 
   return response.data;
+
 }
 
 
@@ -304,6 +343,7 @@ export async function del<
     );
 
   return response.data;
+
 }
 
 
@@ -321,6 +361,7 @@ export const authApi = {
       data
     ),
 
+
   login: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -329,10 +370,12 @@ export const authApi = {
       data
     ),
 
+
   me: <T = unknown>() =>
     get<T>(
       '/auth/me'
     ),
+
 
   logout: <T = unknown>() =>
     post<T>(
@@ -352,6 +395,7 @@ export const userApi = {
     get<T>(
       '/users/me'
     ),
+
 
   update: <T = unknown>(
     data: Record<string, unknown>
@@ -375,12 +419,14 @@ export const storeApi = {
       '/stores'
     ),
 
+
   get: <T = unknown>(
     storeId: string
   ) =>
     get<T>(
       `/stores/${storeId}`
     ),
+
 
   create: <T = unknown>(
     data: Record<string, unknown>
@@ -390,6 +436,7 @@ export const storeApi = {
       data
     ),
 
+
   update: <T = unknown>(
     storeId: string,
     data: Record<string, unknown>
@@ -398,6 +445,7 @@ export const storeApi = {
       `/stores/${storeId}`,
       data
     ),
+
 
   remove: <T = unknown>(
     storeId: string
@@ -422,6 +470,7 @@ export const brandingApi = {
       `/branding/${storeId}`
     ),
 
+
   update: <T = unknown>(
     storeId: string,
     data: Record<string, unknown>
@@ -444,8 +493,11 @@ export const productApi = {
     params: Record<string, unknown> = {}
   ) =>
     get<T>(
-      `/products${buildQueryString(params)}`
+      `/products${buildQueryString(
+        params
+      )}`
     ),
+
 
   get: <T = unknown>(
     productId: string
@@ -454,6 +506,7 @@ export const productApi = {
       `/products/${productId}`
     ),
 
+
   create: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -461,6 +514,7 @@ export const productApi = {
       '/products',
       data
     ),
+
 
   update: <T = unknown>(
     productId: string,
@@ -471,12 +525,14 @@ export const productApi = {
       data
     ),
 
+
   remove: <T = unknown>(
     productId: string
   ) =>
     del<T>(
       `/products/${productId}`
     ),
+
 
   generate: <T = unknown>(
     data: Record<string, unknown>
@@ -504,6 +560,7 @@ export const themeApi = {
       )}`
     ),
 
+
   get: <T = unknown>(
     _storeId: string,
     themeId: string
@@ -511,6 +568,7 @@ export const themeApi = {
     get<T>(
       `/themes/${themeId}`
     ),
+
 
   create: <T = unknown>(
     storeId: string,
@@ -524,6 +582,7 @@ export const themeApi = {
       }
     ),
 
+
   update: <T = unknown>(
     _storeId: string,
     themeId: string,
@@ -534,6 +593,7 @@ export const themeApi = {
       data
     ),
 
+
   remove: <T = unknown>(
     _storeId: string,
     themeId: string
@@ -541,6 +601,7 @@ export const themeApi = {
     del<T>(
       `/themes/${themeId}`
     ),
+
 
   deploy: <T = unknown>(
     _storeId: string,
@@ -568,6 +629,7 @@ export const analyticsApi = {
       )}`
     ),
 
+
   daily: <T = unknown>(
     params: Record<string, unknown> = {}
   ) =>
@@ -576,6 +638,7 @@ export const analyticsApi = {
         params
       )}`
     ),
+
 
   events: <T = unknown>(
     params: Record<string, unknown> = {}
@@ -586,6 +649,7 @@ export const analyticsApi = {
       )}`
     ),
 
+
   categories: <T = unknown>(
     params: Record<string, unknown> = {}
   ) =>
@@ -595,6 +659,7 @@ export const analyticsApi = {
       )}`
     ),
 
+
   recent: <T = unknown>(
     params: Record<string, unknown> = {}
   ) =>
@@ -603,6 +668,7 @@ export const analyticsApi = {
         params
       )}`
     ),
+
 
   store: <T = unknown>(
     storeId: string,
@@ -614,6 +680,7 @@ export const analyticsApi = {
       )}`
     ),
 
+
   recordEvent: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -621,6 +688,7 @@ export const analyticsApi = {
       '/analytics/events',
       data
     ),
+
 
   recordAIUsage: <T = unknown>(
     data: Record<string, unknown>
@@ -644,10 +712,12 @@ export const billingApi = {
       '/billing/plans'
     ),
 
+
   subscription: <T = unknown>() =>
     get<T>(
       '/billing/subscription'
     ),
+
 
   checkout: <T = unknown>(
     data: Record<string, unknown>
@@ -657,15 +727,18 @@ export const billingApi = {
       data
     ),
 
+
   cancel: <T = unknown>() =>
     post<T>(
       '/billing/cancel'
     ),
 
+
   resume: <T = unknown>() =>
     post<T>(
       '/billing/resume'
     ),
+
 
   changePlan: <T = unknown>(
     data: Record<string, unknown>
@@ -675,10 +748,12 @@ export const billingApi = {
       data
     ),
 
+
   limits: <T = unknown>() =>
     get<T>(
       '/billing/limits'
     ),
+
 
   feature: <T = unknown>(
     data: Record<string, unknown>
@@ -702,10 +777,12 @@ export const adminApi = {
       '/admin/dashboard'
     ),
 
+
   overview: <T = unknown>() =>
     get<T>(
       '/admin/overview'
     ),
+
 
   users: <T = unknown>(
     params: Record<string, unknown> = {}
@@ -716,6 +793,7 @@ export const adminApi = {
       )}`
     ),
 
+
   user: <T = unknown>(
     userId: string
   ) =>
@@ -723,10 +801,12 @@ export const adminApi = {
       `/admin/users/${userId}`
     ),
 
+
   userCounts: <T = unknown>() =>
     get<T>(
       '/admin/users/counts'
     ),
+
 
   updateUserStatus: <T = unknown>(
     userId: string,
@@ -734,8 +814,29 @@ export const adminApi = {
   ) =>
     patch<T>(
       `/admin/users/${userId}/status`,
-      { status }
+      {
+        status,
+      }
     ),
+
+
+  // PATCH /api/admin/users/:userId/activate
+  activateUser: <T = unknown>(
+    userId: string
+  ) =>
+    patch<T>(
+      `/admin/users/${userId}/activate`
+    ),
+
+
+  // PATCH /api/admin/users/:userId/suspend
+  suspendUser: <T = unknown>(
+    userId: string
+  ) =>
+    patch<T>(
+      `/admin/users/${userId}/suspend`
+    ),
+
 
   deleteUser: <T = unknown>(
     userId: string
@@ -743,6 +844,7 @@ export const adminApi = {
     del<T>(
       `/admin/users/${userId}`
     ),
+
 
   stores: <T = unknown>(
     params: Record<string, unknown> = {}
@@ -753,6 +855,7 @@ export const adminApi = {
       )}`
     ),
 
+
   store: <T = unknown>(
     storeId: string
   ) =>
@@ -760,10 +863,12 @@ export const adminApi = {
       `/admin/stores/${storeId}`
     ),
 
+
   storeCounts: <T = unknown>() =>
     get<T>(
       '/admin/stores/counts'
     ),
+
 
   updateStoreStatus: <T = unknown>(
     storeId: string,
@@ -771,8 +876,11 @@ export const adminApi = {
   ) =>
     patch<T>(
       `/admin/stores/${storeId}/status`,
-      { status }
+      {
+        status,
+      }
     ),
+
 
   billing: <T = unknown>(
     params: Record<string, unknown> = {}
@@ -783,23 +891,30 @@ export const adminApi = {
       )}`
     ),
 
+
   billingSummary: <T = unknown>() =>
     get<T>(
       '/admin/billing/summary'
     ),
 
+
   recentUsers: <T = unknown>(
     limit = 10
   ) =>
     get<T>(
-      `/admin/recent/users?limit=${limit}`
+      `/admin/recent/users?limit=${encodeURIComponent(
+        String(limit)
+      )}`
     ),
+
 
   recentStores: <T = unknown>(
     limit = 10
   ) =>
     get<T>(
-      `/admin/recent/stores?limit=${limit}`
+      `/admin/recent/stores?limit=${encodeURIComponent(
+        String(limit)
+      )}`
     ),
 
 };
