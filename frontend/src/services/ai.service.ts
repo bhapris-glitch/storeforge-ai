@@ -343,11 +343,11 @@ export async function generate(
 // AI STATUS
 // ============================================================================
 
-export async function getAIStatus()
-: Promise<unknown> {
+export async function getAIStatus() {
 
-
-  return aiApi.status();
+  return aiApi.chat({
+    action: 'status'
+  });
 
 }
 
