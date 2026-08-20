@@ -234,6 +234,12 @@ export interface AdminCountsResponse {
 // QUERY TYPES
 // ============================================================================
 
+/**
+ * Query parameters shared by admin list endpoints.
+ *
+ * The index signature is intentional because the admin API client
+ * expects Record<string, unknown>.
+ */
 export interface AdminListParams {
 
   page?: number;
@@ -247,6 +253,8 @@ export interface AdminListParams {
   role?: string;
 
   plan?: string;
+
+  [key: string]: unknown;
 }
 
 
@@ -257,7 +265,9 @@ export interface AdminListParams {
 export async function getDashboard() {
 
   const response =
-    await adminApi.dashboard<AdminDashboardResponse>();
+    await adminApi.dashboard<
+      AdminDashboardResponse
+    >();
 
   return response;
 }
@@ -270,7 +280,9 @@ export async function getDashboard() {
 export async function getOverview() {
 
   const response =
-    await adminApi.overview<AdminOverviewResponse>();
+    await adminApi.overview<
+      AdminOverviewResponse
+    >();
 
   return response;
 }
@@ -285,7 +297,9 @@ export async function getUsers(
 ) {
 
   const response =
-    await adminApi.users<AdminUsersResponse>(
+    await adminApi.users<
+      AdminUsersResponse
+    >(
       params
     );
 
@@ -297,14 +311,16 @@ export async function getUser(
   userId: string
 ) {
 
-  if (!userId) {
+  if (!userId?.trim()) {
     throw new Error(
       'User ID is required.'
     );
   }
 
   const response =
-    await adminApi.user<AdminUserResponse>(
+    await adminApi.user<
+      AdminUserResponse
+    >(
       userId
     );
 
@@ -315,7 +331,9 @@ export async function getUser(
 export async function getUserCounts() {
 
   const response =
-    await adminApi.userCounts<AdminCountsResponse>();
+    await adminApi.userCounts<
+      AdminCountsResponse
+    >();
 
   return response;
 }
@@ -330,20 +348,22 @@ export async function updateUserStatus(
   status: string
 ) {
 
-  if (!userId) {
+  if (!userId?.trim()) {
     throw new Error(
       'User ID is required.'
     );
   }
 
-  if (!status) {
+  if (!status?.trim()) {
     throw new Error(
       'User status is required.'
     );
   }
 
   const response =
-    await adminApi.updateUserStatus<AdminUserResponse>(
+    await adminApi.updateUserStatus<
+      AdminUserResponse
+    >(
       userId,
       status
     );
@@ -356,14 +376,16 @@ export async function activateUser(
   userId: string
 ) {
 
-  if (!userId) {
+  if (!userId?.trim()) {
     throw new Error(
       'User ID is required.'
     );
   }
 
   const response =
-    await adminApi.activateUser<AdminUserResponse>(
+    await adminApi.activateUser<
+      AdminUserResponse
+    >(
       userId
     );
 
@@ -375,14 +397,16 @@ export async function suspendUser(
   userId: string
 ) {
 
-  if (!userId) {
+  if (!userId?.trim()) {
     throw new Error(
       'User ID is required.'
     );
   }
 
   const response =
-    await adminApi.suspendUser<AdminUserResponse>(
+    await adminApi.suspendUser<
+      AdminUserResponse
+    >(
       userId
     );
 
@@ -394,14 +418,16 @@ export async function deleteUser(
   userId: string
 ) {
 
-  if (!userId) {
+  if (!userId?.trim()) {
     throw new Error(
       'User ID is required.'
     );
   }
 
   const response =
-    await adminApi.deleteUser<AdminUserResponse>(
+    await adminApi.deleteUser<
+      AdminUserResponse
+    >(
       userId
     );
 
@@ -418,7 +444,9 @@ export async function getStores(
 ) {
 
   const response =
-    await adminApi.stores<AdminStoresResponse>(
+    await adminApi.stores<
+      AdminStoresResponse
+    >(
       params
     );
 
@@ -430,14 +458,16 @@ export async function getStore(
   storeId: string
 ) {
 
-  if (!storeId) {
+  if (!storeId?.trim()) {
     throw new Error(
       'Store ID is required.'
     );
   }
 
   const response =
-    await adminApi.store<AdminStoreResponse>(
+    await adminApi.store<
+      AdminStoreResponse
+    >(
       storeId
     );
 
@@ -448,7 +478,9 @@ export async function getStore(
 export async function getStoreCounts() {
 
   const response =
-    await adminApi.storeCounts<AdminCountsResponse>();
+    await adminApi.storeCounts<
+      AdminCountsResponse
+    >();
 
   return response;
 }
@@ -463,20 +495,22 @@ export async function updateStoreStatus(
   status: string
 ) {
 
-  if (!storeId) {
+  if (!storeId?.trim()) {
     throw new Error(
       'Store ID is required.'
     );
   }
 
-  if (!status) {
+  if (!status?.trim()) {
     throw new Error(
       'Store status is required.'
     );
   }
 
   const response =
-    await adminApi.updateStoreStatus<AdminStoreResponse>(
+    await adminApi.updateStoreStatus<
+      AdminStoreResponse
+    >(
       storeId,
       status
     );
@@ -494,7 +528,9 @@ export async function getBilling(
 ) {
 
   const response =
-    await adminApi.billing<AdminBillingResponse>(
+    await adminApi.billing<
+      AdminBillingResponse
+    >(
       params
     );
 
