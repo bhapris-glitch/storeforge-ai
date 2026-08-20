@@ -998,6 +998,57 @@ export const adminApi = {
 
 };
 
+// ============================================================================
+// DEPLOYMENT API
+// ============================================================================
+
+export const deploymentApi = {
+
+  list: <T = unknown>(
+    storeId: string
+  ) =>
+    get<T>(
+      `/deployments/${storeId}`
+    ),
+
+
+  get: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) =>
+    get<T>(
+      `/deployments/${storeId}/${deploymentId}`
+    ),
+
+
+  create: <T = unknown>(
+    storeId: string,
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      `/deployments/${storeId}`,
+      data
+    ),
+
+
+  status: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) =>
+    get<T>(
+      `/deployments/${storeId}/${deploymentId}/status`
+    ),
+
+
+  cancel: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) =>
+    post<T>(
+      `/deployments/${storeId}/${deploymentId}/cancel`
+    ),
+
+};
 
 // ============================================================================
 // HEALTH
