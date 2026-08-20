@@ -779,7 +779,6 @@ export const aiApi = {
       data
     ),
 
-
   generateProduct: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -787,7 +786,6 @@ export const aiApi = {
       '/ai/products/generate',
       data
     ),
-
 
   generateTheme: <T = unknown>(
     data: Record<string, unknown>
@@ -797,7 +795,6 @@ export const aiApi = {
       data
     ),
 
-
   generateContent: <T = unknown>(
     data: Record<string, unknown>
   ) =>
@@ -806,26 +803,14 @@ export const aiApi = {
       data
     ),
 
-};
+  analyze: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    post<T>(
+      '/ai/analyze',
+      data
+    ),
 
-analyze: async <T = unknown>(data: Record<string, unknown>) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/ai/analyze`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("AI analysis failed");
-    }
-
-    return response.json() as Promise<T>;
-  },
 };
 
 // ============================================================================
