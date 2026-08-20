@@ -322,12 +322,12 @@ export async function generate(
 
 
   const response =
-    await aiApi.generate<AIGenerationResponse>(
-      {
-        prompt,
-        context
-      }
-    );
+  await aiApi.generateContent<AIGenerationResponse>(
+    {
+      prompt,
+      context
+    }
+  );
 
 
   return (
