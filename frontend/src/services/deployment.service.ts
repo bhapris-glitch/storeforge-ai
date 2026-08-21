@@ -315,10 +315,10 @@ export async function createDeployment(
 
 
   const response =
-    await deploymentApi.create<DeploymentResponse>(
-      storeId,
-      data as Record<string, unknown>
-    );
+  await deploymentApi.create<DeploymentResponse>(
+    storeId,
+    data as unknown as Record<string, unknown>
+  );
 
 
   const deployment =
