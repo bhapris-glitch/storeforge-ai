@@ -383,11 +383,59 @@ export const authApi = {
     ),
 
 };
+//=================================
+// deployment Api
+// =================================
 
+export const deploymentApi = {
+
+  list: <T = unknown>(
+    storeId: string
+  ) =>
+    api.get<T>(
+      `/deployments/${storeId}`
+    ),
+
+  get: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) =>
+    api.get<T>(
+      `/deployments/${storeId}/${deploymentId}`
+    ),
+
+  create: <T = unknown>(
+    storeId: string,
+    data: Record<string, unknown>
+  ) =>
+    api.post<T>(
+      `/deployments/${storeId}`,
+      data
+    ),
+
+  status: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) =>
+    api.get<T>(
+      `/deployments/${storeId}/${deploymentId}/status`
+    ),
+
+  cancel: <T = unknown>(
+    storeId: string,
+    deploymentId: string
+  ) =>
+    api.post<T>(
+      `/deployments/${storeId}/${deploymentId}/cancel`,
+      {}
+    ),
+
+};
 
 // ============================================================================
 // USER API
 // ============================================================================
+
 
 export const userApi = {
 
@@ -452,46 +500,6 @@ export const storeApi = {
   ) =>
     del<T>(
       `/stores/${storeId}`
-    ),
-
-};
-
-// ============================================================================
-// DEPLOYMENT API
-// ============================================================================
-
-export const deploymentApi = {
-
-  history: <T = unknown>() =>
-    api.get<T>('/deployments'),
-
-  get: <T = unknown>(
-    id: string
-  ) =>
-    api.get<T>(
-      `/deployments/${id}`
-    ),
-
-  status: <T = unknown>(
-    id: string
-  ) =>
-    api.get<T>(
-      `/deployments/${id}/status`
-    ),
-
-  create: <T = unknown>(
-    data: Record<string, unknown>
-  ) =>
-    api.post<T>(
-      '/deployments',
-      data
-    ),
-
-  cancel: <T = unknown>(
-    id: string
-  ) =>
-    api.post<T>(
-      `/deployments/${id}/cancel`
     ),
 
 };
@@ -803,15 +811,6 @@ export const billingApi = {
     ),
 
 };
-
-// ============================================================================
-// AI API
-// ============================================================================
-
-// export const aiApi = {
-// ============================================================================
-// AI API
-// ============================================================================
 
 // ============================================================================
 // AI API
