@@ -456,6 +456,45 @@ export const storeApi = {
 
 };
 
+// ============================================================================
+// DEPLOYMENT API
+// ============================================================================
+
+export const deploymentApi = {
+
+  history: <T = unknown>() =>
+    api.get<T>('/deployments'),
+
+  get: <T = unknown>(
+    id: string
+  ) =>
+    api.get<T>(
+      `/deployments/${id}`
+    ),
+
+  status: <T = unknown>(
+    id: string
+  ) =>
+    api.get<T>(
+      `/deployments/${id}/status`
+    ),
+
+  create: <T = unknown>(
+    data: Record<string, unknown>
+  ) =>
+    api.post<T>(
+      '/deployments',
+      data
+    ),
+
+  cancel: <T = unknown>(
+    id: string
+  ) =>
+    api.post<T>(
+      `/deployments/${id}/cancel`
+    ),
+
+};
 
 // ============================================================================
 // BRANDING API
@@ -998,49 +1037,6 @@ export const adminApi = {
 
 };
 
-// ============================================================================
-// DEPLOYMENT API
-// ============================================================================
-
-// ============================================================================
-// DEPLOYMENT API
-// ============================================================================
-
-export const deploymentApi = {
-
-  history: <T = unknown>() =>
-    api.get<T>('/deployments'),
-
-  get: <T = unknown>(
-    id: string
-  ) =>
-    api.get<T>(
-      `/deployments/${id}`
-    ),
-
-  status: <T = unknown>(
-    id: string
-  ) =>
-    api.get<T>(
-      `/deployments/${id}/status`
-    ),
-
-  create: <T = unknown>(
-    data: Record<string, unknown>
-  ) =>
-    api.post<T>(
-      '/deployments',
-      data
-    ),
-
-  cancel: <T = unknown>(
-    id: string
-  ) =>
-    api.post<T>(
-      `/deployments/${id}/cancel`
-    ),
-
-};
 
 // ============================================================================
 // HEALTH
