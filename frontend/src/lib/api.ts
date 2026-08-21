@@ -1002,50 +1002,42 @@ export const adminApi = {
 // DEPLOYMENT API
 // ============================================================================
 
+// ============================================================================
+// DEPLOYMENT API
+// ============================================================================
+
 export const deploymentApi = {
 
-  list: <T = unknown>(
-    storeId: string
-  ) =>
-    get<T>(
-      `/deployments/${storeId}`
-    ),
-
+  history: <T = unknown>() =>
+    api.get<T>('/deployments'),
 
   get: <T = unknown>(
-    storeId: string,
-    deploymentId: string
+    id: string
   ) =>
-    get<T>(
-      `/deployments/${storeId}/${deploymentId}`
+    api.get<T>(
+      `/deployments/${id}`
     ),
 
+  status: <T = unknown>(
+    id: string
+  ) =>
+    api.get<T>(
+      `/deployments/${id}/status`
+    ),
 
   create: <T = unknown>(
-    storeId: string,
     data: Record<string, unknown>
   ) =>
-    post<T>(
-      `/deployments/${storeId}`,
+    api.post<T>(
+      '/deployments',
       data
     ),
 
-
-  status: <T = unknown>(
-    storeId: string,
-    deploymentId: string
-  ) =>
-    get<T>(
-      `/deployments/${storeId}/${deploymentId}/status`
-    ),
-
-
   cancel: <T = unknown>(
-    storeId: string,
-    deploymentId: string
+    id: string
   ) =>
-    post<T>(
-      `/deployments/${storeId}/${deploymentId}/cancel`
+    api.post<T>(
+      `/deployments/${id}/cancel`
     ),
 
 };
