@@ -407,7 +407,7 @@ return response.data;
     deploymentId: string
   ): Promise<T> => {
 
-    return api.get<T>(
+    return get<T>(
       `/deployments/${storeId}/${deploymentId}`
     );
 
