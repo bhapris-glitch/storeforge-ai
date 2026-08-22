@@ -419,7 +419,7 @@ return response.data;
     data: Record<string, unknown>
   ): Promise<T> => {
 
-    return api.post<T>(
+    return post<T>(
       `/deployments/${storeId}`,
       data
     );
@@ -432,7 +432,7 @@ return response.data;
     deploymentId: string
   ): Promise<T> => {
 
-    return api.get<T>(
+    return get<T>(
       `/deployments/${storeId}/${deploymentId}/status`
     );
 
@@ -444,7 +444,7 @@ return response.data;
     deploymentId: string
   ): Promise<T> => {
 
-    return api.post<T>(
+    return post<T>(
       `/deployments/${storeId}/${deploymentId}/cancel`,
       {}
     );
