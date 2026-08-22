@@ -313,7 +313,6 @@ export async function createDeployment(
 
   }
 
-
   const response =
   await deploymentApi.create<DeploymentResponse>(
     storeId,
