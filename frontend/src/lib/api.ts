@@ -389,46 +389,65 @@ export const authApi = {
 
 export const deploymentApi = {
 
-  list: <T = unknown>(
+  list: async <T = unknown>(
     storeId: string
-  ) =>
-    api.get<T>(
-      `/deployments/${storeId}`
-    ),
+  ): Promise<T> => {
 
-  get: <T = unknown>(
+    return api.get<T>(
+      `/deployments/${storeId}`
+    );
+
+  },
+
+
+  get: async <T = unknown>(
     storeId: string,
     deploymentId: string
-  ) =>
-    api.get<T>(
-      `/deployments/${storeId}/${deploymentId}`
-    ),
+  ): Promise<T> => {
 
-  create: <T = unknown>(
+    return api.get<T>(
+      `/deployments/${storeId}/${deploymentId}`
+    );
+
+  },
+
+
+  create: async <T = unknown>(
     storeId: string,
     data: Record<string, unknown>
-  ) =>
-    api.post<T>(
+  ): Promise<T> => {
+
+    return api.post<T>(
       `/deployments/${storeId}`,
       data
-    ),
+    );
 
-  status: <T = unknown>(
+  },
+
+
+  status: async <T = unknown>(
     storeId: string,
     deploymentId: string
-  ) =>
-    api.get<T>(
+  ): Promise<T> => {
+
+    return api.get<T>(
       `/deployments/${storeId}/${deploymentId}/status`
-    ),
+    );
 
-  cancel: <T = unknown>(
+  },
+
+
+  cancel: async <T = unknown>(
     storeId: string,
     deploymentId: string
-  ) =>
-    api.post<T>(
+  ): Promise<T> => {
+
+    return api.post<T>(
       `/deployments/${storeId}/${deploymentId}/cancel`,
       {}
-    ),
+    );
+
+  },
 
 };
 
@@ -1050,7 +1069,16 @@ export const healthApi = {
 
 };
 
-
+// =======================
+// export 
+// =======================
+export const deploymentApi = {
+list
+   get
+   create
+   status
+   cancel
+}
 // ============================================================================
 // DEFAULT EXPORT
 // ============================================================================
