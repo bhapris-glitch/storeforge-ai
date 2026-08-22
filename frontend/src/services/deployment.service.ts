@@ -18,9 +18,7 @@
  */
 
 'use client';
-import {
-  deploymentApi
-} from '@/lib/api';
+import deploymentApi from '@/lib/api';
 
 
 // ============================================================================
