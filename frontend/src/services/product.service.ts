@@ -378,9 +378,9 @@ export async function getProducts(
 
 
   const response =
-    await productApi.list<ProductsResponse>(
-      storeId
-    );
+    await productApi.list<ProductsResponse>({
+      storeId,
+    });
 
 
   return extractProducts(
