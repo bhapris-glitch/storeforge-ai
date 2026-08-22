@@ -393,9 +393,11 @@ export const deploymentApi = {
     storeId: string
   ): Promise<T> => {
 
-    return api.get<T>(
-      `/deployments/${storeId}`
-    );
+    const response = await api.get<T>(
+  `/deployments/${storeId}`
+);
+
+return response.data;
 
   },
 
