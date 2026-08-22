@@ -417,11 +417,10 @@ export async function getProduct(
   }
 
 
-  const response =
-    await productApi.get<ProductResponse>(
-      storeId,
-      productId
-    );
+ const response = await productApi.get<ProductResponse>({
+  storeId,
+  productId,
+});
 
 
   const product =
